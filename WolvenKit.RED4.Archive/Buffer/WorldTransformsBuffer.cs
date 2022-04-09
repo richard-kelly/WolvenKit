@@ -9,7 +9,7 @@ namespace WolvenKit.RED4.Archive.Buffer
 {
     public class WorldTransformsBuffer : IParseableBuffer
     {
-        public IRedType Data => Transforms;
+        public CArray<IRedType> Data => new(Transforms.Cast<IRedType>().ToList());
 
         public CArray<WorldTransform> Transforms = new();
 

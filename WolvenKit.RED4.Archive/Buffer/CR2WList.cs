@@ -7,11 +7,11 @@ namespace WolvenKit.RED4.Archive.Buffer
 {
     public class CR2WList : Red4File, IParseableBuffer, IRedCloneable
     {
-        public IRedType Data
+        public CArray<IRedType> Data
         {
             get
             {
-                var a = new CArray<RedBaseClass>();
+                var a = new CArray<IRedType>();
                 Files.ForEach(x => a.Add(x.RootChunk));
                 return a;
             }

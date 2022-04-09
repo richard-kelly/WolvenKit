@@ -9,7 +9,7 @@ namespace WolvenKit.RED4.Archive.Buffer
 {
     public class TilesBuffer : IParseableBuffer, IRedType
     {
-        public IRedType Data => Vertices;
+        public CArray<IRedType> Data => new(Vertices.Cast<IRedType>().ToList());
         
         public Vector3 Uk1 = new();
 

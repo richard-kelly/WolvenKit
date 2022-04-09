@@ -158,6 +158,14 @@ public partial class RedBaseClass
                     queue.Enqueue((handle.GetValue(), propPath));
                 }
             }
+
+            if (value is IRedBufferWrapper { Buffer.Data.Data: { } data })
+            {
+                foreach (var tuple in ProcessValue(propPath, data))
+                {
+                    yield return tuple;
+                }
+            }
         }
     }
 

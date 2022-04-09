@@ -9,7 +9,7 @@ namespace WolvenKit.RED4.Archive.Buffer
 {
     public class CollisionBuffer : IParseableBuffer
     {
-        public IRedType Data => null;
+        public CArray<IRedType> Data => null;
 
         public List<CollisionActor> Actors = new();
 

@@ -11,9 +11,17 @@ namespace WolvenKit.RED4.Archive.Buffer
         public short CruidIndex;
         public IList<CRUID> RootCruids;
 
-        public IRedType Data => RootChunk;
+        public CArray<IRedType> Data
+        {
+            get
+            {
+                var a = new CArray<IRedType>();
+                Chunks.ForEach(x => a.Add(x));
+                return a;
+            }
+        }
 
-        public IList<RedBaseClass> Chunks { get; set; }
+        public List<RedBaseClass> Chunks { get; set; }
         public RedBaseClass RootChunk => Chunks[0];
 
         public Package04()
