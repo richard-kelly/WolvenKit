@@ -1,7 +1,10 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using MahApps.Metro.IconPacks;
 using Splat;
 using WolvenKit.Functionality.Commands;
 using WolvenKit.Interfaces;
@@ -17,6 +20,27 @@ public class RedArrayViewModel : ChunkViewModel, IRedCollectionViewModel
     {
         AddItemToCollectionCommand = new DelegateCommand(_ => ExecuteAddItemToCollection());
         DeleteAllFromCollectionCommand = new DelegateCommand(_ => ExecuteDeleteAllFromCollection());
+
+        SetMenuItems();
+    }
+
+    private void SetMenuItems()
+    {
+        MenuItems.Add(new MenuItem
+        {
+            Command = AddItemToCollectionCommand,
+            Header = "Add new Item",
+            IsCheckable = false,
+            Icon = new PackIconMaterial
+            {
+                Width = 13,
+                Height = 13,
+                Padding = new Thickness(0, 0, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Kind = PackIconMaterialKind.ContentDuplicate
+            }
+        });
     }
 
     public ICommand AddItemToCollectionCommand { get; }

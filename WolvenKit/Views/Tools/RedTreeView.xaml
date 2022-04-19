@@ -382,7 +382,6 @@
                     <DataTemplate DataType="{x:Type shell:ChunkViewModel}">
                         <Grid
                             Background="Transparent"
-                            ContextMenu="{StaticResource TreeViewContextMenu}"
                             Tag="{Binding}"
                             ToolTip="{Binding Type}">
                             <Grid.CommandBindings>
@@ -415,7 +414,6 @@
                     <DataTemplate>
                         <Grid
                             Background="Transparent"
-                            ContextMenu="{StaticResource TreeViewContextMenu}"
                             Tag="{Binding}"
                             ToolTip="{Binding Type}">
                             <Grid.ColumnDefinitions>
@@ -442,7 +440,6 @@
                     <DataTemplate>
                         <Grid
                             Background="Transparent"
-                            ContextMenu="{StaticResource TreeViewContextMenu}"
                             Tag="{Binding}"
                             ToolTip="{Binding Type}">
                             <Grid.ColumnDefinitions>
@@ -470,7 +467,6 @@
                     <DataTemplate>
                         <Grid
                             Background="Transparent"
-                            ContextMenu="{StaticResource TreeViewContextMenu}"
                             Tag="{Binding}"
                             ToolTip="{Binding Type}">
                             <Grid.ColumnDefinitions>
@@ -551,6 +547,9 @@
             LoadOnDemandCommand="{Binding OnDemandLoadingCommand}"
             QueryNodeSize="TreeView_QueryNodeSize"
         -->
+        <syncfusion:SfTreeView.ItemContextMenu>
+            <ContextMenu />
+        </syncfusion:SfTreeView.ItemContextMenu>
         <syncfusion:SfTreeView.DragPreviewTemplate>
             <DataTemplate DataType="{x:Type syncfusion:TreeViewDragInfo}">
                 <Border BorderBrush="{StaticResource BorderAlt}" BorderThickness="1">

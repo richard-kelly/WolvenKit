@@ -1,26 +1,13 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Newtonsoft.Json;
 using Syncfusion.UI.Xaml.TreeView;
 using Syncfusion.UI.Xaml.TreeView.Engine;
-using WolvenKit.Common.Conversion;
 using WolvenKit.Interfaces;
 using WolvenKit.RED4.Types;
+using WolvenKit.ViewModels.Red;
 using WolvenKit.ViewModels.Shell;
 
 namespace WolvenKit.Views.Tools
@@ -45,6 +32,30 @@ namespace WolvenKit.Views.Tools
                     TargetType = childClass
                 });
             }
+
+            TreeView.ItemContextMenuOpening += TreeView_ItemContextMenuOpening;
+        }
+
+        private void TreeView_ItemContextMenuOpening(object sender, ItemContextMenuOpeningEventArgs e)
+        {
+            e.ContextMenu.Items.Clear();
+
+            if (e.MenuInfo.Node.Content is RedArrayViewModel ravm)
+            {
+                foreach (var item in ravm.MenuItems)
+                {
+                    e.ContextMenu.Items.Add(item);
+                }
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private void CreateMenuItem()
+        {
+
         }
 
         public static readonly DependencyProperty ItemsSourceProperty =

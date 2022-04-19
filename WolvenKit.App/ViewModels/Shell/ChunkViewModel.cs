@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using DynamicData;
@@ -79,6 +80,8 @@ namespace WolvenKit.ViewModels.Shell
         [Reactive] public string Descriptor { get; private set; }
         [Reactive] public bool IsDefault { get; private set; }
         [Reactive] public bool IsReadOnly { get; set; }
+
+        public List<MenuItem> MenuItems { get; } = new List<MenuItem>();
 
         #region Constructors
 
