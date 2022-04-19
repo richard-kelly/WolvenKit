@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,7 +17,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Newtonsoft.Json;
 using Syncfusion.UI.Xaml.TreeView;
+using Syncfusion.UI.Xaml.TreeView.Engine;
 using WolvenKit.Common.Conversion;
+using WolvenKit.Interfaces;
 using WolvenKit.RED4.Types;
 using WolvenKit.ViewModels.Shell;
 
@@ -30,6 +33,18 @@ namespace WolvenKit.Views.Tools
         public RedTreeView()
         {
             InitializeComponent();
+
+            var childClasses = Assembly.GetAssembly(typeof(ChunkViewModel)).GetTypes().Where(myType => myType.IsAssignableTo(typeof(ISelectableTreeViewItemModel)));
+            foreach (var childClass in childClasses)
+            {
+                TreeView.HierarchyPropertyDescriptors.Add(new HierarchyPropertyDescriptor
+                {
+                    ChildPropertyName = "TVProperties",
+                    IsExpandedPropertyName = "IsExpanded",
+                    IsSelectedPropertyName = "IsSelected",
+                    TargetType = childClass
+                });
+            }
         }
 
         public static readonly DependencyProperty ItemsSourceProperty =

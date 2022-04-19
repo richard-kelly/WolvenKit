@@ -15,6 +15,7 @@
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:templates="clr-namespace:WolvenKit.Views.Templates"
+    xmlns:interfaces="clr-namespace:WolvenKit.Interfaces;assembly=WolvenKit.App"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:TypeArguments="shell:ChunkViewModel"
@@ -80,7 +81,7 @@
                     </StackPanel>
                 </Button>
             </DataTemplate>
-            <DataTemplate x:Key="AddToArrayButton">
+            <DataTemplate x:Key="AddToArrayButton" DataType="{x:Type interfaces:IRedCollectionViewModel}">
                 <Button
                     Height="12"
                     Padding="0"
@@ -181,7 +182,7 @@
                     </Button>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate x:Key="DeleteAllButton">
+            <DataTemplate x:Key="DeleteAllButton" DataType="{x:Type interfaces:IRedCollectionViewModel}">
                 <StackPanel Orientation="Horizontal" Visibility="{Binding IsEnabled, ElementName=RealDeleteButton, Converter={StaticResource Boolean2VisibilityConverter}}">
                     <ToggleButton
                         x:Name="DeleteButton"
