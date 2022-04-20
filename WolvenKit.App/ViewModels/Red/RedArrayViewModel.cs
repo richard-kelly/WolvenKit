@@ -7,14 +7,14 @@ using System.Windows.Input;
 using MahApps.Metro.IconPacks;
 using Splat;
 using WolvenKit.Functionality.Commands;
-using WolvenKit.Interfaces;
+using WolvenKit.Functionality.Converters;
 using WolvenKit.RED4.Types;
 using WolvenKit.ViewModels.Dialogs;
 using WolvenKit.ViewModels.Shell;
 
 namespace WolvenKit.ViewModels.Red;
 
-public class RedArrayViewModel : ChunkViewModel, IRedCollectionViewModel
+public class RedArrayViewModel : ChunkViewModel
 {
     public RedArrayViewModel(IRedType data, ChunkViewModel parent, string name) : base(data, parent, name)
     {
@@ -26,7 +26,10 @@ public class RedArrayViewModel : ChunkViewModel, IRedCollectionViewModel
 
     private void SetMenuItems()
     {
-        MenuItems.Add(new MenuItem
+        HeaderButtons.Add(RedDataTemplateEnum.AddToArrayButton);
+        HeaderButtons.Add(RedDataTemplateEnum.DeleteAllButton);
+
+        ContextMenuItems.Add(new MenuItem
         {
             Command = AddItemToCollectionCommand,
             Header = "Add new Item",

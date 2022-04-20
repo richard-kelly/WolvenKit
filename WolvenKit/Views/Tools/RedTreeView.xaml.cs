@@ -42,7 +42,7 @@ namespace WolvenKit.Views.Tools
 
             if (e.MenuInfo.Node.Content is RedArrayViewModel ravm)
             {
-                foreach (var item in ravm.MenuItems)
+                foreach (var item in ravm.ContextMenuItems)
                 {
                     e.ContextMenu.Items.Add(item);
                 }

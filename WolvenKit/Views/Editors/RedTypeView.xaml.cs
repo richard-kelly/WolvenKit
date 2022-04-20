@@ -1,4 +1,5 @@
 using ReactiveUI;
+using WolvenKit.Functionality.Converters;
 using WolvenKit.ViewModels.Shell;
 
 namespace WolvenKit.Views.Editors
@@ -10,6 +11,8 @@ namespace WolvenKit.Views.Editors
     {
         public RedTypeView()
         {
+            Resources.Add("EnumToDataTemplateConverter", new EnumToDataTemplateConverter { FrameworkElement = this });
+
             InitializeComponent();
 
             this.WhenActivated(disposables =>

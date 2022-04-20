@@ -21,6 +21,7 @@ using WolvenKit.Common.Conversion;
 using WolvenKit.Common.Services;
 using WolvenKit.Functionality.Commands;
 using WolvenKit.Functionality.Controllers;
+using WolvenKit.Functionality.Converters;
 using WolvenKit.Functionality.Services;
 using WolvenKit.Interfaces;
 using WolvenKit.Models;
@@ -33,6 +34,7 @@ using WolvenKit.ViewModels.Dialogs;
 using WolvenKit.ViewModels.Documents;
 using WolvenKit.ViewModels.Red;
 using static WolvenKit.RED4.Types.RedReflection;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace WolvenKit.ViewModels.Shell
 {
@@ -81,7 +83,8 @@ namespace WolvenKit.ViewModels.Shell
         [Reactive] public bool IsDefault { get; private set; }
         [Reactive] public bool IsReadOnly { get; set; }
 
-        public List<MenuItem> MenuItems { get; } = new List<MenuItem>();
+        public List<RedDataTemplateEnum> HeaderButtons { get; } = new();
+        public List<MenuItem> ContextMenuItems { get; } = new();
 
         #region Constructors
 
@@ -177,7 +180,6 @@ namespace WolvenKit.ViewModels.Shell
             AddRefCommand = new DelegateCommand(_ => ExecuteAddRef(), _ => CanAddRef());
             ExportChunkCommand = new DelegateCommand(_ => ExecuteExportChunk(), _ => CanExportChunk());
             AddHandleCommand = new DelegateCommand(_ => ExecuteAddHandle(), _ => CanAddHandle());
-            AddItemToCompiledDataCommand = new DelegateCommand(_ => ExecuteAddItemToCompiledData(), _ => CanAddItemToCompiledData());
             DeleteItemCommand = new DelegateCommand(_ => ExecuteDeleteItem(), _ => CanDeleteItem());
             OpenChunkCommand = new DelegateCommand(_ => ExecuteOpenChunk(), _ => CanOpenChunk());
             CopyChunkCommand = new DelegateCommand(_ => ExecuteCopyChunk(), _ => CanCopyChunk());
@@ -1515,42 +1517,6 @@ namespace WolvenKit.ViewModels.Shell
                     Tab.File.SetIsDirty(true);
                 }
             }
-        }
-
-        public ICommand AddItemToCompiledDataCommand { get; private set; }
-        private bool CanAddItemToCompiledData() => ResolvedPropertyType != null && ResolvedPropertyType.IsAssignableTo(typeof(IRedBufferPointer));
-        private void ExecuteAddItemToCompiledData()
-        {
-            if (Data == null)
-            {
-                Data = RedTypeManager.CreateRedType(ResolvedPropertyType);
-                (Data as IRedBufferPointer).SetValue(new RED4.RedBuffer()
-                {
-                    Data = new Package04()
-                    {
-                        Chunks = new List<RedBaseClass>()
-                    }
-                });
-            }
-            if (Data is DataBuffer db2)
-            {
-                if (Name == "rawData" && db2.Data is null)
-                {
-                    db2.Buffer = RedBuffer.CreateBuffer(0, new byte[] { 0 });
-                    db2.Data = new CR2WList();
-                }
-            }
-            var db = Data as IRedBufferPointer;
-            ObservableCollection<string> existing = null;
-            if (db.GetValue().Data is Package04 pkg)
-            {
-                existing = new ObservableCollection<string>(pkg.Chunks.Select(t => t.GetType().Name).Distinct());
-            }
-            var app = Locator.Current.GetService<AppViewModel>();
-            app.SetActiveDialog(new CreateClassDialogViewModel(existing, true)
-            {
-                DialogHandler = HandleChunk
-            });
         }
 
         public void HandleChunk(DialogViewModel sender)

@@ -17,10 +17,267 @@
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:templates="clr-namespace:WolvenKit.Views.Templates"
+    xmlns:elements="clr-namespace:WolvenKit.Views.Elements"
+    xmlns:converters1="clr-namespace:WolvenKit.Functionality.Converters;assembly=WolvenKit.App"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:TypeArguments="shell:ChunkViewModel"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <DataTemplate x:Key="AddHandleButton">
+            <Button
+                    Height="12"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    Command="{Binding AddHandleCommand}"
+                    Style="{StaticResource ButtonCustom}"
+                    ToolTip="Add Handle"
+                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconVaadinIcons
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Kind="PlusCircle" />
+                    <TextBlock
+                            Margin="1,0,4,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Text="Create Handle" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="AddToCompiledDataButton">
+            <Button
+                    Height="12"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    Command="{Binding AddItemToCompiledDataCommand}"
+                    Style="{StaticResource ButtonCustom}"
+                    ToolTip="Add New Chunk"
+                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconVaadinIcons
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Kind="PlusCircle" />
+                    <TextBlock
+                            Margin="1,0,4,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Text="Create Item In Buffer" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="AddToArrayButton">
+            <Button
+                    Height="12"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    Command="{Binding AddItemToCollectionCommand}"
+                    Style="{StaticResource ButtonCustom}"
+                    ToolTip="Add New Element"
+                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconVaadinIcons
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Kind="PlusCircle" />
+                    <TextBlock
+                            Margin="1,0,4,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Text="Create Item In Array" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="AddToBufferButton">
+            <Button
+                    Height="12"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    Command="{Binding AddItemToCollectionCommand}"
+                    Style="{StaticResource ButtonCustom}"
+                    ToolTip="Add New Element"
+                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <iconPacks:PackIconVaadinIcons
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Kind="PlusCircle" />
+                    <TextBlock
+                            Margin="1,0,4,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitYellow}"
+                            Text="Create Item In Buffer" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="DeleteButton">
+            <StackPanel Orientation="Horizontal">
+                <ToggleButton
+                        x:Name="DeleteButton"
+                        Margin="0,0,0,0"
+                        Padding="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding IsDeleteReady}"
+                        ToolTip="Delete Element">
+                    <ToggleButton.Style>
+                        <Style BasedOn="{StaticResource ToggleButtonCustom}" TargetType="ToggleButton">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Grid
+                                                Width="20"
+                                                Height="12"
+                                                Background="Transparent">
+                                            <iconPacks:PackIconVaadinIcons
+                                                    Padding="2"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{StaticResource WolvenKitRed}"
+                                                    Kind="Trash" />
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsInArray}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <TextBlock
+                                                        Margin="3,0,0,0"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center"
+                                                        Text="Confirm?" />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Button
+                        x:Name="RealDeleteButton"
+                        Width="20"
+                        Height="12"
+                        Margin="0,0,0,0"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Command="{Binding DeleteItemCommand}"
+                        ToolTip="Delete Element">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource ButtonCustom}" TargetType="Button">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=DeleteButton}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <iconPacks:PackIconVaadinIcons
+                            Padding="2,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitRed}"
+                            Kind="Trash" />
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="DeleteAllButton">
+            <StackPanel Orientation="Horizontal">
+                <ToggleButton
+                        x:Name="DeleteButton"
+                        Margin="0,0,0,0"
+                        Padding="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding IsDeleteReady}"
+                        ToolTip="Delete All Items">
+                    <ToggleButton.Style>
+                        <Style BasedOn="{StaticResource ToggleButtonCustom}" TargetType="ToggleButton">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Grid Height="12" Background="Transparent">
+                                            <StackPanel Orientation="Horizontal">
+                                                <iconPacks:PackIconVaadinIcons
+                                                        Padding="2"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{StaticResource WolvenKitRed}"
+                                                        Kind="Trash" />
+                                                <TextBlock
+                                                        Margin="1,0,4,0"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{StaticResource WolvenKitRed}"
+                                                        Text="Delete All Items" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsArray}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <TextBlock
+                                                        Margin="3,0,0,0"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center"
+                                                        Text="Confirm?" />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Button
+                        x:Name="RealDeleteButton"
+                        Width="20"
+                        Height="12"
+                        Margin="0,0,0,0"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Command="{Binding DeleteAllFromCollectionCommand}"
+                        ToolTip="Delete All">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource ButtonCustom}" TargetType="Button">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=DeleteButton}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <iconPacks:PackIconVaadinIcons
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource WolvenKitRed}"
+                            Kind="Trash" />
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
     <Grid Background="{StaticResource ContentBackground}">
         <Grid.Resources>
             <sys:Double x:Key="RowHeight">26</sys:Double>
@@ -34,259 +291,6 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-            <DataTemplate x:Key="AddHandleButton" DataType="{x:Type shell:ChunkViewModel}">
-                <Button
-                    Height="12"
-                    Padding="0"
-                    VerticalAlignment="Center"
-                    Background="Transparent"
-                    Command="{Binding AddHandleCommand}"
-                    Style="{StaticResource ButtonCustom}"
-                    ToolTip="Add Handle"
-                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <iconPacks:PackIconVaadinIcons
-                            Padding="2"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Kind="PlusCircle" />
-                        <TextBlock
-                            Margin="1,0,4,0"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Text="Create Handle" />
-                    </StackPanel>
-                </Button>
-            </DataTemplate>
-            <DataTemplate x:Key="AddToCompiledDataButton" DataType="{x:Type shell:ChunkViewModel}">
-                <Button
-                    Height="12"
-                    Padding="0"
-                    VerticalAlignment="Center"
-                    Background="Transparent"
-                    Command="{Binding AddItemToCompiledDataCommand}"
-                    Style="{StaticResource ButtonCustom}"
-                    ToolTip="Add New Chunk"
-                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <iconPacks:PackIconVaadinIcons
-                            Padding="2"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Kind="PlusCircle" />
-                        <TextBlock
-                            Margin="1,0,4,0"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Text="Create Item In Buffer" />
-                    </StackPanel>
-                </Button>
-            </DataTemplate>
-            <DataTemplate x:Key="AddToArrayButton">
-                <Button
-                    Height="12"
-                    Padding="0"
-                    VerticalAlignment="Center"
-                    Background="Transparent"
-                    Command="{Binding AddItemToCollectionCommand}"
-                    Style="{StaticResource ButtonCustom}"
-                    ToolTip="Add New Element"
-                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <iconPacks:PackIconVaadinIcons
-                            Padding="2"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Kind="PlusCircle" />
-                        <TextBlock
-                            Margin="1,0,4,0"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Text="Create Item In Array" />
-                    </StackPanel>
-                </Button>
-            </DataTemplate>
-            <DataTemplate x:Key="AddToBufferButton">
-                <Button
-                    Height="12"
-                    Padding="0"
-                    VerticalAlignment="Center"
-                    Background="Transparent"
-                    Command="{Binding AddItemToCollectionCommand}"
-                    Style="{StaticResource ButtonCustom}"
-                    ToolTip="Add New Element"
-                    Visibility="{Binding Path=IsEnabled, RelativeSource={RelativeSource Self}, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <iconPacks:PackIconVaadinIcons
-                            Padding="2"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Kind="PlusCircle" />
-                        <TextBlock
-                            Margin="1,0,4,0"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitYellow}"
-                            Text="Create Item In Buffer" />
-                    </StackPanel>
-                </Button>
-            </DataTemplate>
-            <DataTemplate x:Key="DeleteButton">
-                <StackPanel Orientation="Horizontal" Visibility="{Binding IsInArray, Converter={StaticResource Boolean2VisibilityConverter}}">
-                    <ToggleButton
-                        x:Name="DeleteButton"
-                        Margin="0,0,0,0"
-                        Padding="0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        IsChecked="{Binding IsDeleteReady}"
-                        ToolTip="Delete Element">
-                        <ToggleButton.Style>
-                            <Style BasedOn="{StaticResource ToggleButtonCustom}" TargetType="ToggleButton">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate>
-                                            <Grid
-                                                Width="20"
-                                                Height="12"
-                                                Background="Transparent">
-                                                <iconPacks:PackIconVaadinIcons
-                                                    Padding="2"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Center"
-                                                    Foreground="{StaticResource WolvenKitRed}"
-                                                    Kind="Trash" />
-                                            </Grid>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsInArray}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate>
-                                                    <TextBlock
-                                                        Margin="3,0,0,0"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Center"
-                                                        Text="Confirm?" />
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ToggleButton.Style>
-                    </ToggleButton>
-                    <Button
-                        x:Name="RealDeleteButton"
-                        Width="20"
-                        Height="12"
-                        Margin="0,0,0,0"
-                        Padding="0"
-                        VerticalAlignment="Center"
-                        Command="{Binding DeleteItemCommand}"
-                        ToolTip="Delete Element">
-                        <Button.Style>
-                            <Style BasedOn="{StaticResource ButtonCustom}" TargetType="Button">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, ElementName=DeleteButton}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <iconPacks:PackIconVaadinIcons
-                            Padding="2,0"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitRed}"
-                            Kind="Trash" />
-                    </Button>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate x:Key="DeleteAllButton">
-                <StackPanel Orientation="Horizontal" Visibility="{Binding IsEnabled, ElementName=RealDeleteButton, Converter={StaticResource Boolean2VisibilityConverter}}">
-                    <ToggleButton
-                        x:Name="DeleteButton"
-                        Margin="0,0,0,0"
-                        Padding="0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        IsChecked="{Binding IsDeleteReady}"
-                        ToolTip="Delete All Items">
-                        <ToggleButton.Style>
-                            <Style BasedOn="{StaticResource ToggleButtonCustom}" TargetType="ToggleButton">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate>
-                                            <Grid Height="12" Background="Transparent">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <iconPacks:PackIconVaadinIcons
-                                                        Padding="2"
-                                                        VerticalAlignment="Center"
-                                                        Foreground="{StaticResource WolvenKitRed}"
-                                                        Kind="Trash" />
-                                                    <TextBlock
-                                                        Margin="1,0,4,0"
-                                                        VerticalAlignment="Center"
-                                                        Foreground="{StaticResource WolvenKitRed}"
-                                                        Text="Delete All Items" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsArray}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate>
-                                                    <TextBlock
-                                                        Margin="3,0,0,0"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Center"
-                                                        Text="Confirm?" />
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ToggleButton.Style>
-                    </ToggleButton>
-                    <Button
-                        x:Name="RealDeleteButton"
-                        Width="20"
-                        Height="12"
-                        Margin="0,0,0,0"
-                        Padding="0"
-                        VerticalAlignment="Center"
-                        Command="{Binding DeleteAllFromCollectionCommand}"
-                        ToolTip="Delete All">
-                        <Button.Style>
-                            <Style BasedOn="{StaticResource ButtonCustom}" TargetType="Button">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, ElementName=DeleteButton}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <iconPacks:PackIconVaadinIcons
-                            Padding="2"
-                            VerticalAlignment="Center"
-                            Foreground="{StaticResource WolvenKitRed}"
-                            Kind="Trash" />
-                    </Button>
-                </StackPanel>
-            </DataTemplate>
             <Style x:Key="PGNameStyle" TargetType="TextBlock">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsDefault}" Value="True">
@@ -437,16 +441,18 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <ContentPresenter ContentTemplate="{StaticResource AddToCompiledDataButton}" />
-                            <ContentPresenter ContentTemplate="{StaticResource AddHandleButton}" />
-                            <ContentPresenter Content="{Binding}">
-                                <ContentPresenter.Resources>
-                                    <DataTemplate DataType="{x:Type shell:ChunkViewModel}" />
-                                    <DataTemplate DataType="{x:Type interfaces:IRedCollectionViewModel}">
-                                        <ContentPresenter ContentTemplate="{StaticResource DeleteAllButton}" />
+                            <ItemsControl DataContext="{Binding}" ItemsSource="{Binding HeaderButtons}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <ContentPresenter ContentTemplate="{Binding Converter={StaticResource EnumToDataTemplateConverter}}" />
                                     </DataTemplate>
-                                </ContentPresenter.Resources>
-                            </ContentPresenter>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </DataTemplate>
                 </converters:RedEditorTemplateSelector.RedTypeViewer>
@@ -512,27 +518,18 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <ContentPresenter Content="{Binding}">
-                                        <ContentPresenter.Resources>
-                                            <DataTemplate DataType="{x:Type shell:ChunkViewModel}" />
-                                            <DataTemplate DataType="{x:Type red:RedArrayViewModel}">
-                                                <ContentPresenter ContentTemplate="{StaticResource AddToArrayButton}" />
+                                    <ItemsControl DataContext="{Binding}" ItemsSource="{Binding HeaderButtons}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <ContentPresenter ContentTemplate="{Binding Converter={StaticResource EnumToDataTemplateConverter}}" />
                                             </DataTemplate>
-                                            <DataTemplate DataType="{x:Type red:RedBufferPointerViewModel}">
-                                                <ContentPresenter ContentTemplate="{StaticResource AddToBufferButton}" />
-                                            </DataTemplate>
-                                        </ContentPresenter.Resources>
-                                    </ContentPresenter>
-                                    <ContentPresenter ContentTemplate="{StaticResource AddToCompiledDataButton}" />
-                                    <ContentPresenter ContentTemplate="{StaticResource AddHandleButton}" />
-                                    <ContentPresenter Content="{Binding}">
-                                        <ContentPresenter.Resources>
-                                            <DataTemplate DataType="{x:Type shell:ChunkViewModel}" />
-                                            <DataTemplate DataType="{x:Type interfaces:IRedCollectionViewModel}">
-                                                <ContentPresenter ContentTemplate="{StaticResource DeleteAllButton}" />
-                                            </DataTemplate>
-                                        </ContentPresenter.Resources>
-                                    </ContentPresenter>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
                             </Border>
                             <!--ListView
@@ -729,30 +726,18 @@
                             Kind="ArrowRight" />
                         <TextBlock Foreground="{StaticResource WolvenKitTan}" Text="{Binding ResolvedType, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <ContentPresenter
-                        Margin="5,0,0,0"
-                        Content="{Binding}"
-                        ContentTemplate="{StaticResource AddToCompiledDataButton}" />
-                    <ContentPresenter Content="{Binding}">
-                        <ContentPresenter.Resources>
-                            <DataTemplate DataType="{x:Type shell:ChunkViewModel}" />
-                            <DataTemplate DataType="{x:Type red:RedArrayViewModel}">
-                                <ContentPresenter ContentTemplate="{StaticResource AddToArrayButton}" />
+                    <ItemsControl DataContext="{Binding}" ItemsSource="{Binding HeaderButtons}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ContentPresenter ContentTemplate="{Binding Converter={StaticResource EnumToDataTemplateConverter}}" />
                             </DataTemplate>
-                            <DataTemplate DataType="{x:Type red:RedBufferPointerViewModel}">
-                                <ContentPresenter ContentTemplate="{StaticResource AddToBufferButton}" />
-                            </DataTemplate>
-                        </ContentPresenter.Resources>
-                    </ContentPresenter>
-                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource AddHandleButton}" />
-                    <ContentPresenter Content="{Binding}">
-                        <ContentPresenter.Resources>
-                            <DataTemplate DataType="{x:Type shell:ChunkViewModel}" />
-                            <DataTemplate DataType="{x:Type interfaces:IRedCollectionViewModel}">
-                                <ContentPresenter ContentTemplate="{StaticResource DeleteAllButton}" />
-                            </DataTemplate>
-                        </ContentPresenter.Resources>
-                    </ContentPresenter>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </Grid>
         </Border>
