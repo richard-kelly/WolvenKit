@@ -70,6 +70,18 @@ public class RedArrayViewModel : ChunkViewModel
         if (existing.Count == 1)
         {
             var type = arr.InnerType;
+
+            if (type == typeof(CKeyValuePair))
+            {
+                var app = Locator.Current.GetService<AppViewModel>();
+                app.SetActiveDialog(new SelectRedTypeDialogViewModel
+                {
+                    DialogHandler = HandleCKeyValuePair
+                });
+
+                return;
+            }
+
             var newItem = RedTypeManager.CreateRedType(type);
             if (newItem is IRedBaseHandle handle)
             {
