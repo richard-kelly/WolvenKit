@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
@@ -72,6 +73,7 @@ namespace WolvenKit.Modkit.RED4.GeneralStructs
 
         }
     }
+    [DebuggerDisplay("{name}", Type = "RawMeshContainer")]
     public class RawMeshContainer
     {
         public Vector3[] positions { get; set; }
@@ -88,6 +90,7 @@ namespace WolvenKit.Modkit.RED4.GeneralStructs
         public string name { get; set; }
         public uint weightCount { get; set; }
         public string[] materialNames { get; set; }
+        public uint lod { get; set; }
     }
     public class Re4MeshContainer
     {
@@ -103,6 +106,7 @@ namespace WolvenKit.Modkit.RED4.GeneralStructs
         public string name { get; set; }
         public uint weightcount { get; set; }
         public ushort[,] garmentMorph { get; set; }
+        public uint lod { get; set; }
     }
 
     public class RawTargetContainer

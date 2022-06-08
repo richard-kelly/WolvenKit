@@ -17,6 +17,7 @@ using Vec3 = System.Numerics.Vector3;
 using Vec4 = System.Numerics.Vector4;
 using Quat = System.Numerics.Quaternion;
 using Mat4 = System.Numerics.Matrix4x4;
+using System.Text.RegularExpressions;
 
 namespace WolvenKit.Modkit.RED4
 {
@@ -415,18 +416,40 @@ namespace WolvenKit.Modkit.RED4
             VerifyGLTF(model);
 
             var Meshes = new List<RawMeshContainer>();
-            foreach (var node in model.LogicalNodes)
+            var Materials = new List<string>();
+            AddGltfMeshesToRawContainer(Meshes, Materials, model.LogicalNodes);
+
+            if (cr2w.RootChunk is CMesh mesh)
             {
-                if (node.Mesh != null)
+                // add option to set the appearance name here
+                var mma = (meshMeshAppearance)RedTypeManager.Create(typeof(meshMeshAppearance));
+                mma.Name = "default";
+                var regex = new Regex(@"(?<material>.*)(\.[0-9]+)");
+                foreach (var material in Materials)
                 {
-                    Meshes.Add(GltfMeshToRawContainer(node));
+                    var match = regex.Match(material);
+                    if (match.Success)
+                    {
+                        mma.ChunkMaterials.Add(match.Groups["material"].Value);
+                    } else
+                    {
+                        mma.ChunkMaterials.Add(material);
+                    }
                 }
-                else if (args.FillEmpty)
-                {
-                    Meshes.Add(CreateEmptyMesh(node.Name));
-                }
+                mesh.Appearances.Add(new CHandle<meshMeshAppearance>(mma));
             }
-            Meshes = Meshes.OrderBy(o => o.name).ToList();
+            //foreach (var node in model.LogicalNodes)
+            //{
+            //if (node.Mesh != null)
+            //{
+            //    Meshes.Add(GltfMeshToRawContainer(Meshes, node));
+            //}
+            //else if (args.FillEmpty)
+            //{
+            //    Meshes.Add(CreateEmptyMesh(node.Name));
+            //}
+            //}
+            //Meshes = Meshes.OrderBy(o => o.name).ToList();
 
             var max = new Vec3(Single.MinValue, Single.MinValue, Single.MinValue);
             var min = new Vec3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
@@ -562,6 +585,138 @@ namespace WolvenKit.Modkit.RED4
             return meshContainer;
         }
 
+        private static void AddGltfMeshesToRawContainer(List<RawMeshContainer> containers, List<string> materials, IReadOnlyList<Node> nodes)
+        {
+            foreach (Node node in nodes)
+            {
+                var regex = new Regex(@"(?<appearance>.*)(LOD_?(?<lod>[0-9]))");
+                var match = regex.Match(node.Name);
+
+                uint lod = 1;
+                if (match.Success && !string.IsNullOrEmpty(match.Groups["lod"].Value))
+                {
+                    lod = UInt32.Parse(match.Groups["lod"].Value);
+                }
+
+                int index = 0;
+                foreach (MeshPrimitive primitive in node.Mesh.Primitives)
+                {
+
+                    materials.Add(primitive.Material.Name);
+
+                    var accessors = primitive.VertexAccessors.Keys.ToList();
+                    var meshContainer = new RawMeshContainer
+                    {
+                        name = node.Name + $"_{Convert.ToString(index).PadLeft(2, '0')}",
+                        lod = lod,
+
+                        // Copying PNT w/ RHS to LHS Y+ to Z+
+                        positions = primitive.GetVertices("POSITION").AsVector3Array().ToList().AsParallel().Select(p => new Vec3(p.X, -p.Z, p.Y)).ToArray(),
+                        normals = primitive.GetVertices("NORMAL").AsVector3Array().ToList().AsParallel().Select(p => new Vec3(p.X, -p.Z, p.Y)).ToArray(),
+                        tangents = primitive.GetVertices("TANGENT").AsVector4Array().ToList().AsParallel().Select(p => new Vec4(p.X, -p.Z, p.Y, p.W)).ToArray(),
+
+                        colors0 = accessors.Contains("COLOR_0") ? primitive.GetVertices("COLOR_0").AsVector4Array().ToArray() : Array.Empty<Vec4>(),
+                        colors1 = accessors.Contains("COLOR_1") ? primitive.GetVertices("COLOR_1").AsVector4Array().ToArray() : Array.Empty<Vec4>(),
+                        texCoords0 = accessors.Contains("TEXCOORD_0") ? primitive.GetVertices("TEXCOORD_0").AsVector2Array().ToArray() : Array.Empty<Vec2>(),
+                        texCoords1 = accessors.Contains("TEXCOORD_1") ? primitive.GetVertices("TEXCOORD_1").AsVector2Array().ToArray() : Array.Empty<Vec2>()
+                    };
+
+                    var indicesList = primitive.GetIndices().ToList();
+
+                    if (node.Name.ToLower().Contains("double") || node.Mesh.Name.ToLower().Contains("double"))
+                    {
+                        meshContainer.indices = new uint[indicesList.Count * 2];
+                        for (var i = 0; i < indicesList.Count; i += 3)
+                        {
+                            // RHS to LHS face orientations
+                            meshContainer.indices[i] = indicesList[i + 1];
+                            meshContainer.indices[i + 1] = indicesList[i];
+                            meshContainer.indices[i + 2] = indicesList[i + 2];
+
+                            meshContainer.indices[indicesList.Count + i] = indicesList[i];
+                            meshContainer.indices[indicesList.Count + i + 1] = indicesList[i + 1];
+                            meshContainer.indices[indicesList.Count + i + 2] = indicesList[i + 2];
+                        }
+                    }
+                    else
+                    {
+                        meshContainer.indices = new uint[indicesList.Count];
+                        for (var i = 0; i < indicesList.Count; i += 3)
+                        {
+                            // RHS to LHS face orientations
+                            meshContainer.indices[i] = indicesList[i + 1];
+                            meshContainer.indices[i + 1] = indicesList[i];
+                            meshContainer.indices[i + 2] = indicesList[i + 2];
+                        }
+                    }
+
+                    var joints0 = accessors.Contains("JOINTS_0") ? primitive.GetVertices("JOINTS_0").AsVector4Array().ToList() : null;
+
+                    var joints1 = accessors.Contains("JOINTS_1") ? primitive.GetVertices("JOINTS_1").AsVector4Array().ToList() : null;
+
+                    var weights0 = accessors.Contains("WEIGHTS_0") ? primitive.GetVertices("WEIGHTS_0").AsVector4Array().ToList() : null;
+
+                    var weights1 = accessors.Contains("WEIGHTS_1") ? primitive.GetVertices("WEIGHTS_1").AsVector4Array().ToList() : null;
+
+                    meshContainer.weightCount = 0;
+
+                    if (joints0 != null)
+                    {
+                        meshContainer.weightCount += 4;
+                    }
+
+                    if (joints1 != null)
+                    {
+                        meshContainer.weightCount += 4;
+                    }
+
+                    var vertCount = meshContainer.positions.Length;
+                    meshContainer.boneindices = new ushort[vertCount, meshContainer.weightCount];
+                    meshContainer.weights = new float[vertCount, meshContainer.weightCount];
+
+                    for (var i = 0; i < vertCount; i++)
+                    {
+                        if (joints0 != null && i < joints0.Count)
+                        {
+                            meshContainer.boneindices[i, 0] = (ushort)joints0[i].X;
+                            meshContainer.boneindices[i, 1] = (ushort)joints0[i].Y;
+                            meshContainer.boneindices[i, 2] = (ushort)joints0[i].Z;
+                            meshContainer.boneindices[i, 3] = (ushort)joints0[i].W;
+
+                            meshContainer.weights[i, 0] = weights0[i].X;
+                            meshContainer.weights[i, 1] = weights0[i].Y;
+                            meshContainer.weights[i, 2] = weights0[i].Z;
+                            meshContainer.weights[i, 3] = weights0[i].W;
+                        }
+                        if (joints1 != null && i < joints1.Count)
+                        {
+                            meshContainer.boneindices[i, 4] = (ushort)joints1[i].X;
+                            meshContainer.boneindices[i, 5] = (ushort)joints1[i].Y;
+                            meshContainer.boneindices[i, 6] = (ushort)joints1[i].Z;
+                            meshContainer.boneindices[i, 7] = (ushort)joints1[i].W;
+
+                            meshContainer.weights[i, 4] = weights1[i].X;
+                            meshContainer.weights[i, 5] = weights1[i].Y;
+                            meshContainer.weights[i, 6] = weights1[i].Z;
+                            meshContainer.weights[i, 7] = weights1[i].W;
+                        }
+                    }
+
+                    meshContainer.garmentMorph = Array.Empty<Vec3>();
+                    if (primitive.MorphTargetsCount > 0)
+                    {
+                        var idx = primitive.GetMorphTargetAccessors(0).Keys.ToList().IndexOf("POSITION");
+                        var extraDataList = primitive.GetMorphTargetAccessors(0).Values.ToList()[idx].AsVector3Array().ToList();
+
+                        meshContainer.garmentMorph = extraDataList.Select(p => new Vec3(p.X, -p.Z, p.Y)).ToArray();
+                    }
+
+                    containers.Add(meshContainer);
+                    index++;
+                }
+            }
+        }
+
         private static RawMeshContainer GltfMeshToRawContainer(Node node)
         {
             if (node.Mesh == null)
@@ -574,7 +729,7 @@ namespace WolvenKit.Modkit.RED4
 
             var meshContainer = new RawMeshContainer
             {
-                name = mesh.Name,
+                name = node.Name,
 
                 // Copying PNT w/ RHS to LHS Y+ to Z+
                 positions = mesh.Primitives[0].GetVertices("POSITION").AsVector3Array().ToList().AsParallel().Select(p => new Vec3(p.X, -p.Z, p.Y)).ToArray(),
@@ -684,7 +839,8 @@ namespace WolvenKit.Modkit.RED4
         {
             var Re4Mesh = new Re4MeshContainer
             {
-                name = mesh.name
+                name = mesh.name,
+                lod = mesh.lod
             };
 
             var vertCount = mesh.positions.Length;
@@ -932,18 +1088,19 @@ namespace WolvenKit.Modkit.RED4
 
             for (var i = 0; i < meshesInfo.meshCount; i++)
             {
-                if (expMeshes[i].name.Contains("LOD"))
-                {
-                    var idx = expMeshes[i].name.IndexOf("LOD_");
-                    if (idx < expMeshes[i].name.Length - 1)
-                    {
-                        meshesInfo.LODLvl[i] = Convert.ToUInt32(expMeshes[i].name.Substring(idx + 4, 1));
-                    }
-                }
-                else
-                {
-                    meshesInfo.LODLvl[i] = 1;
-                }
+                //if (expMeshes[i].name.Contains("LOD"))
+                //{
+                //    var idx = expMeshes[i].name.IndexOf("LOD_");
+                //    if (idx < expMeshes[i].name.Length - 1)
+                //    {
+                //        meshesInfo.LODLvl[i] = Convert.ToUInt32(expMeshes[i].name.Substring(idx + 4, 1));
+                //    }
+                //}
+                //else
+                //{
+                //    meshesInfo.LODLvl[i] = 1;
+                //}
+                meshesInfo.LODLvl[i] = expMeshes[i].lod;
             }
 
             return meshesInfo;

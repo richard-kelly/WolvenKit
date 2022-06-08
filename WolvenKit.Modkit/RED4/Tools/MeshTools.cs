@@ -485,7 +485,8 @@ namespace WolvenKit.Modkit.RED4.Tools
                     {
                         materialNames[e] = app.ChunkMaterials[e];
                     }
-                    meshesInfo.appearances.Add(app.Name + $"{i}", materialNames);
+                    //meshesInfo.appearances.Add(app.Name + $"{i}", materialNames);
+                    meshesInfo.appearances.Add(app.Name, materialNames);
                 }
             }
 
@@ -506,7 +507,8 @@ namespace WolvenKit.Modkit.RED4.Tools
 
                 var meshContainer = new RawMeshContainer
                 {
-                    positions = new Vec3[info.vertCounts[index]]
+                    positions = new Vec3[info.vertCounts[index]],
+                    lod = info.LODLvl[index]
                 };
 
                 // getting positions
@@ -682,7 +684,8 @@ namespace WolvenKit.Modkit.RED4.Tools
                     meshContainer.indices[i] = gbr.ReadUInt16();
                 }
 
-                meshContainer.name = "submesh_" + Convert.ToString(index).PadLeft(2, '0') + "_LOD_" + info.LODLvl[index];
+                //meshContainer.name = "submesh_" + Convert.ToString(index).PadLeft(2, '0') + "_LOD_" + info.LODLvl[index];
+                meshContainer.name = info.appearances.Keys.FirstOrDefault("default");
 
                 meshContainer.materialNames = new string[info.appearances.Count];
                 var apps = info.appearances.Keys.ToList();
@@ -854,10 +857,15 @@ namespace WolvenKit.Modkit.RED4.Tools
             var buffer = model.UseBuffer(ms.ToArray());
             var BuffViewoffset = 0;
 
+            var nodes = new Dictionary<uint, Node>();
             foreach (var mesh in meshes)
             {
-                var mes = model.CreateMesh(mesh.name);
-                var prim = mes.CreatePrimitive();
+                if (!nodes.ContainsKey(mesh.lod))
+                {
+                    nodes[mesh.lod] = parent.CreateNode();
+                    nodes[mesh.lod].Mesh = model.CreateMesh($"{mesh.name}_LOD{mesh.lod}");
+                }
+                var prim = nodes[mesh.lod].Mesh.CreatePrimitive();
                 if (materials != null && materials.ContainsKey(mesh.materialNames[0]))
                 {
                     prim.Material = materials[mesh.materialNames[0]];
@@ -965,23 +973,21 @@ namespace WolvenKit.Modkit.RED4.Tools
                     prim.SetIndexAccessor(acc);
                     BuffViewoffset += mesh.indices.Length * 2;
                 }
-                var node = parent.CreateNode(mesh.name);
-                node.Mesh = mes;
                 if (skin != null && mesh.weightCount > 0)
                 {
-                    node.Skin = skin;
+                    nodes[mesh.lod].Skin = skin;
                 }
 
                 if (mesh.garmentMorph.Length > 0)
                 {
                     string[] arr = { "GarmentSupport" };
                     var obj = new { mesh.materialNames, targetNames = arr };
-                    mes.Extras = SharpGLTF.IO.JsonContent.Serialize(obj);
+                    nodes[mesh.lod].Mesh.Extras = SharpGLTF.IO.JsonContent.Serialize(obj);
                 }
                 else
                 {
                     var obj = new { mesh.materialNames };
-                    mes.Extras = SharpGLTF.IO.JsonContent.Serialize(obj);
+                    nodes[mesh.lod].Mesh.Extras = SharpGLTF.IO.JsonContent.Serialize(obj);
                 }
                 if (mesh.garmentMorph.Length > 0)
                 {
@@ -995,7 +1001,6 @@ namespace WolvenKit.Modkit.RED4.Tools
                     prim.SetMorphTargetAccessors(0, dict);
                     BuffViewoffset += mesh.garmentMorph.Length * 12;
                 }
-
             }
         }
 
@@ -1010,7 +1015,22 @@ namespace WolvenKit.Modkit.RED4.Tools
                 skin.BindJoints(RIG.ExportNodes(ref model, rig).Values.ToArray());
             }
 
-            AddSubmeshesToModel(meshes, skin, ref model, model.UseScene(0));
+            var materials = new Dictionary<string, Material>();
+
+            foreach (var mesh in meshes)
+            {
+                foreach (var material in mesh.materialNames)
+                {
+                    if (!materials.ContainsKey(material))
+                    {
+                        materials[material] = model.CreateMaterial(material);
+                        materials[material].WithPBRMetallicRoughness();
+                        materials[material].DoubleSided = true;
+                    }
+                }
+            }
+
+            AddSubmeshesToModel(meshes, skin, ref model, model.UseScene(0), materials);
 
             model.UseScene(0).Name = "Scene";
             model.DefaultScene = model.UseScene(0);
