@@ -1,5 +1,6 @@
 using System.IO;
 using WolvenKit.RED4.IO;
+using static WolvenKit.RED4.Types.Enums;
 
 namespace WolvenKit.RED4.Types
 {
@@ -25,7 +26,7 @@ namespace WolvenKit.RED4.Types
                 for (int i = 0; i < count; i++)
                 {
                     var p = new CMaterialParameterInfo();
-                    p.Type = reader.BaseReader.ReadByte();
+                    p.Type = (CMaterialParameterType)reader.BaseReader.ReadByte();
                     p.Offset = reader.BaseReader.ReadUInt16();
                     p.Name = reader.ReadCName();
                     s.Add(p);
@@ -58,10 +59,10 @@ namespace WolvenKit.RED4.Types
         // 5 scalar
         [RED("type")]
         [REDProperty(IsIgnored = true)]
-        public CUInt8 Type
+        public CEnum<CMaterialParameterType> Type
         {
-            get => GetPropertyValue<CUInt8>();
-            set => SetPropertyValue<CUInt8>(value);
+            get => GetPropertyValue<CEnum<CMaterialParameterType>>();
+            set => SetPropertyValue<CEnum<CMaterialParameterType>>(value);
         }
 
         [RED("offset")]

@@ -16667,5 +16667,23 @@ namespace WolvenKit.RED4.Types
 			ForceHide = 2
 		}
 
+        public enum CMaterialParameterType
+        {
+            Texture = 1,
+            Color = 2,
+            Unk3 = 3,
+            Vector = 4,
+            Scalar = 5,
+            Unk6 = 6,
+            TextureArray = 7,
+            StructBuffer = 8,
+            Unk9 = 9,
+            SkinParameters = 10,
+            MultilayerSetup = 11,
+            MultilayerMask = 12,
+            HairParameters = 13,
+            FoliageParameters = 14,
+            TerrainSetup = 15
+        }
 	}
 }
