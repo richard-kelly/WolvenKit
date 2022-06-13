@@ -204,7 +204,7 @@
                                     Grid.Column="1"
                                     HorizontalAlignment="Stretch"
                                     Background="{StaticResource WolvenKitCyan}" />
-                                <editors:RedStringEditor Grid.Column="2" RedString="{Binding Text, Mode=TwoWay}" />
+                                <editors:RedCStringEditor Grid.Column="2" RedCString="{Binding Text, Mode=TwoWay}" />
                                 <Border
                                     Grid.ColumnSpan="3"
                                     BorderBrush="{StaticResource BorderAlt}"

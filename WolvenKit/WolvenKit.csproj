@@ -1073,9 +1073,6 @@
     <Compile Update="Views\Templates\RedRefEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\Templates\RedStringEditor.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Update="Properties\Settings.settings">
@@ -1841,10 +1838,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Templates\RedRefEditor.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\Templates\RedStringEditor.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
