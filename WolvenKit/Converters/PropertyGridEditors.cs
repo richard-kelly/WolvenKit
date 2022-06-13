@@ -358,7 +358,7 @@ namespace WolvenKit.Converters
                         ValidatesOnExceptions = true,
                         ValidatesOnDataErrors = true,
                     };
-                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                    BindingOperations.SetBinding(_editor, RedCNameEditor.RedCNameProperty, binding);
                 }
                 else
                 {
@@ -369,7 +369,7 @@ namespace WolvenKit.Converters
                         ValidatesOnExceptions = true,
                         ValidatesOnDataErrors = true
                     };
-                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                    BindingOperations.SetBinding(_editor, RedCNameEditor.RedCNameProperty, binding);
                 }
             }
             public object Create(PropertyInfo propertyInfo)
@@ -399,7 +399,7 @@ namespace WolvenKit.Converters
                         ValidatesOnExceptions = true,
                         ValidatesOnDataErrors = true,
                     };
-                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                    BindingOperations.SetBinding(_editor, RedCStringEditor.RedCStringProperty, binding);
                 }
                 else
                 {
@@ -410,7 +410,7 @@ namespace WolvenKit.Converters
                         ValidatesOnExceptions = true,
                         ValidatesOnDataErrors = true
                     };
-                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                    BindingOperations.SetBinding(_editor, RedCStringEditor.RedCStringProperty, binding);
                 }
             }
             public object Create(PropertyInfo propertyInfo)
@@ -440,7 +440,7 @@ namespace WolvenKit.Converters
                         ValidatesOnExceptions = true,
                         ValidatesOnDataErrors = true,
                     };
-                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                    BindingOperations.SetBinding(_editor, RedNodeRefEditor.RedNodeRefProperty, binding);
                 }
                 else
                 {
@@ -451,7 +451,7 @@ namespace WolvenKit.Converters
                         ValidatesOnExceptions = true,
                         ValidatesOnDataErrors = true
                     };
-                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                    BindingOperations.SetBinding(_editor, RedNodeRefEditor.RedNodeRefProperty, binding);
                 }
             }
             public object Create(PropertyInfo propertyInfo)
