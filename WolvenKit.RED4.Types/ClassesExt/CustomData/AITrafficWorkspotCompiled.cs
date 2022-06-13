@@ -6,10 +6,10 @@ namespace WolvenKit.RED4.Types
     {
         [RED("buffer")]
         [REDProperty(IsIgnored = true)]
-        public CByteArray Buffer
+        public WByteArray Buffer
         {
-            get => GetPropertyValue<CByteArray>();
-            set => SetPropertyValue<CByteArray>(value);
+            get => GetPropertyValue<WByteArray>();
+            set => SetPropertyValue<WByteArray>(value);
         }
 
         public void CustomRead(Red4Reader reader, uint size) => Buffer = reader.BaseReader.ReadBytes((int)size);

@@ -412,7 +412,7 @@ namespace WolvenKit.ViewModels.Shell
                     });
                 }
             }
-            else if (obj is CKeyValuePair kvp)
+            else if (obj is WKeyValuePair kvp)
             {
                 for (var i = 0; i < PropertyCount; i++)
                 {
@@ -875,7 +875,7 @@ namespace WolvenKit.ViewModels.Shell
                     {
                         count += ary.Count;
                     }
-                    else if (ResolvedData is CKeyValuePair)
+                    else if (ResolvedData is WKeyValuePair)
                     {
                         count += 2;
                     }
@@ -1106,9 +1106,9 @@ namespace WolvenKit.ViewModels.Shell
                     Value = "null";
                 }
             }
-            else if (PropertyType.IsAssignableTo(typeof(CByteArray)))
+            else if (PropertyType.IsAssignableTo(typeof(WByteArray)))
             {
-                var ba = (byte[])(CByteArray)Data;
+                var ba = (byte[])(WByteArray)Data;
                 Value = string.Join(" ", ba.Select(x => $"{x:X2}"));
             }
             else if (PropertyType.IsAssignableTo(typeof(LocalizationString)))
@@ -1212,7 +1212,7 @@ namespace WolvenKit.ViewModels.Shell
             {
                 Descriptor = $"[{cl.Files.Count}]";
             }
-            else if (ResolvedData is CKeyValuePair kvp)
+            else if (ResolvedData is WKeyValuePair kvp)
             {
                 Descriptor = kvp.Key;
             }
@@ -1554,7 +1554,7 @@ namespace WolvenKit.ViewModels.Shell
                 if (existing.Count == 1)
                 {
                     var type = arr.InnerType;
-                    if (type == typeof(CKeyValuePair))
+                    if (type == typeof(WKeyValuePair))
                     {
                         var app = Locator.Current.GetService<AppViewModel>();
                         app.SetActiveDialog(new SelectRedTypeDialogViewModel
@@ -1642,7 +1642,7 @@ namespace WolvenKit.ViewModels.Shell
             {
                 var vm = sender as SelectRedTypeDialogViewModel;
 
-                var instance = new CKeyValuePair("", (IRedType)System.Activator.CreateInstance(vm.SelectedType));
+                var instance = new WKeyValuePair("", (IRedType)System.Activator.CreateInstance(vm.SelectedType));
                 InsertChild(-1, instance);
             }
         }

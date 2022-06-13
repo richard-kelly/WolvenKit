@@ -5,25 +5,25 @@ using System.Linq;
 namespace WolvenKit.RED4.Types
 {
     [DebuggerDisplay("{_value,nq}", Type = "CByteArray")]
-    public sealed class CByteArray : IRedPrimitive<byte[]>, IEquatable<CByteArray>
+    public sealed class WByteArray : IRedPrimitive<byte[]>, IEquatable<WByteArray>
     {
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly byte[] _value;
 
-        public CByteArray()
+        public WByteArray()
         {
             _value = Array.Empty<byte>();
         }
 
-        private CByteArray(byte[] data)
+        private WByteArray(byte[] data)
         {
             _value = data;
         }
 
-        public static implicit operator CByteArray(byte[] value) => new(value);
-        public static implicit operator byte[](CByteArray value) => value._value;
+        public static implicit operator WByteArray(byte[] value) => new(value);
+        public static implicit operator byte[](WByteArray value) => value._value;
 
-        public bool Equals(CByteArray other) => Equals(_value.Length, other._value.Length) && _value.SequenceEqual(other._value);
+        public bool Equals(WByteArray other) => Equals(_value.Length, other._value.Length) && _value.SequenceEqual(other._value);
 
         public override bool Equals(object obj)
         {
@@ -42,7 +42,7 @@ namespace WolvenKit.RED4.Types
                 return false;
             }
 
-            return Equals((CByteArray)obj);
+            return Equals((WByteArray)obj);
         }
 
         public override int GetHashCode() => (_value != null ? _value.GetHashCode() : 0);

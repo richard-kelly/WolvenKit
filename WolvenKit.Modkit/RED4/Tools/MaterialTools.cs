@@ -104,7 +104,7 @@ namespace WolvenKit.Modkit.RED4
                             var fakeMaterialInstance = new CMaterialInstance()
                             {
                                 BaseMaterial = new CResourceReference<IMaterial> { DepotPath = path },
-                                Values = new CArray<CKeyValuePair>()
+                                Values = new CArray<WKeyValuePair>()
                             };
 
                             ExternalMaterial.Add(fakeMaterialInstance);
@@ -1245,7 +1245,7 @@ namespace WolvenKit.Modkit.RED4
                             {
                                 DepotPath = mat.BaseMaterial
                             },
-                            Values = new CArray<CKeyValuePair>()
+                            Values = new CArray<WKeyValuePair>()
                         };
 
                     CMaterialTemplate mt = null;
@@ -1274,7 +1274,7 @@ namespace WolvenKit.Modkit.RED4
                     var fakeMaterialInstance = new CMaterialInstance()
                     {
                         BaseMaterial = new CResourceReference<IMaterial> { DepotPath = mat.BaseMaterial },
-                        Values = new CArray<CKeyValuePair>()
+                        Values = new CArray<WKeyValuePair>()
                     };
                     var orgChain = GetMaterialChain(fakeMaterialInstance, archives, ref mts);
 
@@ -1295,7 +1295,7 @@ namespace WolvenKit.Modkit.RED4
                                     object convValue = GetMaterialParameterValue(refer.GetType(), value);
                                     if (orgChain.valueDict.ContainsKey(refer.ParameterName) && !Equals(orgChain.valueDict[refer.ParameterName], convValue))
                                     {
-                                        chunk.Values.Add(new CKeyValuePair(refer.ParameterName, (IRedType)convValue));
+                                        chunk.Values.Add(new WKeyValuePair(refer.ParameterName, (IRedType)convValue));
                                     }
                                 }
                             }
@@ -1306,7 +1306,7 @@ namespace WolvenKit.Modkit.RED4
                                 var (type, _) = RedReflection.GetCSTypeFromRedType(wrapper.Type);
 
                                 var nValue = ((JsonElement)wrapper.Value).Deserialize(type, RedJsonSerializer.Options);
-                                chunk.Values.Add(new CKeyValuePair(key, (IRedType)nValue));
+                                chunk.Values.Add(new WKeyValuePair(key, (IRedType)nValue));
                             }
                         }
                     }

@@ -164,10 +164,10 @@ namespace WolvenKit.RED4.Types
 
         [RED("unk4")]
         [REDProperty(IsIgnored = true)]
-        public CByteArray Unk4
+        public WByteArray Unk4
         {
-            get => GetPropertyValue<CByteArray>();
-            set => SetPropertyValue<CByteArray>(value);
+            get => GetPropertyValue<WByteArray>();
+            set => SetPropertyValue<WByteArray>(value);
         }
 
         [RED("unk5")]

@@ -9,10 +9,10 @@ namespace WolvenKit.RED4.Types
         [RED("buffer")]
         [REDProperty(IsIgnored = true)]
         [Browsable(false)]
-        public CByteArray Buffer
+        public WByteArray Buffer
         {
-            get => GetPropertyValue<CByteArray>();
-            set => SetPropertyValue<CByteArray>(value);
+            get => GetPropertyValue<WByteArray>();
+            set => SetPropertyValue<WByteArray>(value);
         }
 
         public void Read(Red4Reader reader, uint size)

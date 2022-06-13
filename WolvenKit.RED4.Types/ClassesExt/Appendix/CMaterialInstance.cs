@@ -6,10 +6,10 @@ namespace WolvenKit.RED4.Types
     {
         [RED("values")]
         [REDProperty(IsIgnored = true)]
-        public CArray<CKeyValuePair> Values
+        public CArray<WKeyValuePair> Values
         {
-            get => GetPropertyValue<CArray<CKeyValuePair>>();
-            set => SetPropertyValue<CArray<CKeyValuePair>>(value);
+            get => GetPropertyValue<CArray<WKeyValuePair>>();
+            set => SetPropertyValue<CArray<WKeyValuePair>>(value);
         }
 
         public void Read(Red4Reader reader, uint size)
@@ -24,7 +24,7 @@ namespace WolvenKit.RED4.Types
                 var (type, flags) = RedReflection.GetCSTypeFromRedType(typename);
                 var value = reader.Read(type, (uint)valueSize, flags);
 
-                Values.Add(new CKeyValuePair(name, value));
+                Values.Add(new WKeyValuePair(name, value));
             }
         }
 
@@ -52,7 +52,7 @@ namespace WolvenKit.RED4.Types
 
         partial void PostConstruct()
         {
-            Values = new CArray<CKeyValuePair>();
+            Values = new CArray<WKeyValuePair>();
         }
     }
 }

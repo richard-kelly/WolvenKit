@@ -15,11 +15,11 @@ namespace WolvenKit.RED4.CR2W.JSON;
 
 #region Internal
 
-public class CByteArrayConverter : JsonConverter<CByteArray>, ICustomRedConverter
+public class WByteArrayConverter : JsonConverter<WByteArray>, ICustomRedConverter
 {
     public object? ReadRedType(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => Read(ref reader, typeToConvert, options);
 
-    public override CByteArray? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override WByteArray? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null)
         {
@@ -29,14 +29,14 @@ public class CByteArrayConverter : JsonConverter<CByteArray>, ICustomRedConverte
         return reader.GetBytesFromBase64();
     }
 
-    public override void Write(Utf8JsonWriter writer, CByteArray value, JsonSerializerOptions options) => writer.WriteBase64StringValue((byte[])value);
+    public override void Write(Utf8JsonWriter writer, WByteArray value, JsonSerializerOptions options) => writer.WriteBase64StringValue((byte[])value);
 }
 
-public class CKeyValuePairConverter : JsonConverter<CKeyValuePair>, ICustomRedConverter
+public class WKeyValuePairConverter : JsonConverter<WKeyValuePair>, ICustomRedConverter
 {
     public object? ReadRedType(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => Read(ref reader, typeToConvert, options);
 
-    public override CKeyValuePair? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override WKeyValuePair? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null)
         {
@@ -102,10 +102,10 @@ public class CKeyValuePairConverter : JsonConverter<CKeyValuePair>, ICustomRedCo
             throw new JsonException();
         }
 
-        return new CKeyValuePair(propertyName, val);
+        return new WKeyValuePair(propertyName, val);
     }
 
-    public override void Write(Utf8JsonWriter writer, CKeyValuePair value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, WKeyValuePair value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
 

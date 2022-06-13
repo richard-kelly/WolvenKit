@@ -2,9 +2,9 @@ using System;
 
 namespace WolvenKit.RED4.Types;
 
-public sealed class CKeyValuePair : IRedType, IEquatable<CKeyValuePair>, IRedCloneable
+public sealed class WKeyValuePair : IRedType, IEquatable<WKeyValuePair>, IRedCloneable
 {
-    public CKeyValuePair(CName key, IRedType value)
+    public WKeyValuePair(CName key, IRedType value)
     {
         Key = key;
         Value = value;
@@ -13,7 +13,7 @@ public sealed class CKeyValuePair : IRedType, IEquatable<CKeyValuePair>, IRedClo
     public CName Key { get; set; }
     public IRedType Value { get; set; }
 
-    public bool Equals(CKeyValuePair other)
+    public bool Equals(WKeyValuePair other)
     {
         if (ReferenceEquals(null, other))
         {
@@ -55,7 +55,7 @@ public sealed class CKeyValuePair : IRedType, IEquatable<CKeyValuePair>, IRedClo
             return false;
         }
 
-        return Equals((CKeyValuePair)obj);
+        return Equals((WKeyValuePair)obj);
     }
 
     public override int GetHashCode() => HashCode.Combine(Key, Value);
@@ -76,7 +76,7 @@ public sealed class CKeyValuePair : IRedType, IEquatable<CKeyValuePair>, IRedClo
         {
             otherValue = Value;
         }
-        return new CKeyValuePair(Key, otherValue);
+        return new WKeyValuePair(Key, otherValue);
 
     }
 }
