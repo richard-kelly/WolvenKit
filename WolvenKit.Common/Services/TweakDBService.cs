@@ -23,7 +23,7 @@ namespace WolvenKit.Common.Services
         {
             s_stringHelper.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(tweakdbstr));
             s_stringHelper.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(tweakdbstr_add));
-            TweakDBID.ResolveHashHandler = s_stringHelper.GetString;
+            TweakDBIDPool.ResolveHashHandler += s_stringHelper.GetString;
         }
 
         private void OnLoadDB()

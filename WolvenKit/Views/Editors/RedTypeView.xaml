@@ -272,11 +272,16 @@
             <converters:MathConverter x:Key="MathConverter" />
             <converters:IsLastItemInContainerConverter x:Key="IsLastItemInContainerConverter" />
             <converters:RedEditorTemplateSelector x:Key="redEditorTemplates">
-                <converters:RedEditorTemplateSelector.RedStringEditor>
+                <converters:RedEditorTemplateSelector.RedCNameEditor>
                     <DataTemplate>
-                        <editors:RedStringEditor RedString="{Binding Data, Mode=TwoWay}" />
+                        <editors:RedCNameEditor RedCName="{Binding Data, Mode=TwoWay}" />
                     </DataTemplate>
-                </converters:RedEditorTemplateSelector.RedStringEditor>
+                </converters:RedEditorTemplateSelector.RedCNameEditor>
+                <converters:RedEditorTemplateSelector.RedCStringEditor>
+                    <DataTemplate>
+                        <editors:RedCStringEditor RedCString="{Binding Data, Mode=TwoWay}" />
+                    </DataTemplate>
+                </converters:RedEditorTemplateSelector.RedCStringEditor>
                 <converters:RedEditorTemplateSelector.RedTweakEditor>
                     <DataTemplate>
                         <editors:RedTweakEditor RedTweak="{Binding Data, Mode=TwoWay}" />

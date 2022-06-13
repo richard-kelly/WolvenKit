@@ -1,29 +1,18 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text;
-using WolvenKit.Common.FNV1A;
 
 namespace WolvenKit.RED4.Types
 {
     [RED("NodeRef")]
-    [REDType(IsValueType = true)]
     [DebuggerDisplay("{_value}", Type = "NodeRef")]
-    public class NodeRef : BaseStringType
+    public readonly struct NodeRef : IRedPrimitive<NodeRef>, IEquatable<NodeRef>, IComparable<NodeRef>, IComparable
     {
-        private static readonly ConcurrentDictionary<string, ulong> s_NodeRefStringCache = new();
-        private static readonly ConcurrentDictionary<ulong, string> s_NodeRefHashCache = new();
-
-        public delegate string ResolveHash(ulong hash);
-        public static ResolveHash ResolveHashHandler;
-
         private readonly ulong _hash;
 
-        public NodeRef() { }
 
-        private NodeRef(string value) : base(value)
+        private NodeRef(string value)
         {
-            _hash = CalculateHash();
+            _hash = NodeRefPool.AddOrGetHash(value);
         }
 
         private NodeRef(ulong value)
@@ -31,51 +20,47 @@ namespace WolvenKit.RED4.Types
             _hash = value;
         }
 
-        public string GetResolvedText()
-        {
-            if (!string.IsNullOrEmpty(_value))
-            {
-                return _value;
-            }
-            //else if (s_NodeRefHashCache.ContainsKey(_hash))
-            //{
-            //    return s_NodeRefHashCache[_hash];
-            //}
-            else
-            {
-                return ResolveHashHandler?.Invoke(_hash);
-            }
-        }
+        public string GetResolvedText() => NodeRefPool.ResolveHash(_hash);
 
-        private ulong CalculateHash()
-        {
-            if (string.IsNullOrEmpty(_value))
-            {
-                return 0;
-            }
-
-            if (!s_NodeRefStringCache.ContainsKey(_value))
-            {
-                var hash = FNV1A64HashAlgorithm.HashString(_value, Encoding.UTF8, false, true);
-
-                s_NodeRefStringCache.TryAdd(_value, hash);
-                s_NodeRefHashCache.TryAdd(hash, _value);
-            }
-
-            return s_NodeRefStringCache[_value];
-        }
-
-        public ulong GetRedHash() => _hash;
-        public uint GetShortRedHash() => (uint)((_hash >> 32) ^ (uint)_hash);
 
         public static implicit operator NodeRef(string value) => new(value);
-        public static implicit operator string(NodeRef value) => value?._value;
+        public static implicit operator string(NodeRef value) => value.GetResolvedText();
 
         public static implicit operator NodeRef(ulong value) => new(value);
-        public static implicit operator ulong(NodeRef value) => value?._hash ?? 0;
+        public static implicit operator ulong(NodeRef value) => value._hash;
 
         public static bool operator ==(NodeRef a, NodeRef b) => Equals(a, b);
         public static bool operator !=(NodeRef a, NodeRef b) => !(a == b);
+
+        public ulong GetRedHash() => _hash;
+
+        public int CompareTo(object value)
+        {
+            if (value == null)
+            {
+                return 1;
+            }
+
+            if (!(value is NodeRef other))
+            {
+                throw new ArgumentException();
+            }
+
+            return this.CompareTo(other);
+        }
+
+        public int CompareTo(NodeRef other)
+        {
+            var strA = GetResolvedText();
+            var strB = GetResolvedText();
+
+            if (strA != null && strB != null)
+            {
+                return string.Compare(strA, strB, StringComparison.InvariantCulture);
+            }
+
+            return _hash.CompareTo(other._hash);
+        }
 
         public override int GetHashCode() => _hash.GetHashCode();
 
@@ -84,11 +69,6 @@ namespace WolvenKit.RED4.Types
             if (ReferenceEquals(null, obj))
             {
                 return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
             }
 
             if (obj.GetType() != this.GetType())
@@ -101,7 +81,7 @@ namespace WolvenKit.RED4.Types
 
         public bool Equals(NodeRef other)
         {
-            if (!Equals(GetRedHash(), other?.GetRedHash()))
+            if (!Equals(_hash, other._hash))
             {
                 return false;
             }
@@ -110,13 +90,5 @@ namespace WolvenKit.RED4.Types
         }
 
         public override string ToString() => (GetResolvedText() is var text && !string.IsNullOrEmpty(text)) ? text : _hash.ToString();
-
-        //public NodeRef() {}
-        //private NodeRef(string value) : base(value) {}
-
-        //public static implicit operator NodeRef(string value) => new(value);
-        //public static implicit operator string(NodeRef value) => value._value;
-
-        //public override string ToString() => $"NodeRef, Text = '{_value}'";
     }
 }

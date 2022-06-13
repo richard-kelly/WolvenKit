@@ -161,7 +161,7 @@ namespace WolvenKit.RED4.Archive.IO
 
             if (index >= 0 && index < importsList.Count)
             {
-                var import = (PackageImport)importsList[index - 0];
+                var import = (PackageImport)importsList[index];
 
                 return new CResourceAsyncReference<T>
                 {

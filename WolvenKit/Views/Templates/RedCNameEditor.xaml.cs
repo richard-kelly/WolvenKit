@@ -10,9 +10,9 @@ namespace WolvenKit.Views.Editors
     /// <summary>
     /// Interaction logic for RedStringEditor.xaml
     /// </summary>
-    public partial class RedStringEditor : UserControl
+    public partial class RedCNameEditor : UserControl
     {
-        public RedStringEditor()
+        public RedCNameEditor()
         {
             InitializeComponent();
             //TextBox.TextChanged += TextBox_TextChanged;
@@ -30,13 +30,13 @@ namespace WolvenKit.Views.Editors
 
         }
 
-        public BaseStringType RedString
+        public CName RedCName
         {
-            get => (BaseStringType)GetValue(RedStringProperty);
-            set => SetValue(RedStringProperty, value);
+            get => (CName)GetValue(RedCNameProperty);
+            set => SetValue(RedCNameProperty, value);
         }
-        public static readonly DependencyProperty RedStringProperty = DependencyProperty.Register(
-            nameof(RedString), typeof(BaseStringType), typeof(RedStringEditor), new PropertyMetadata(default(BaseStringType)));
+        public static readonly DependencyProperty RedCNameProperty = DependencyProperty.Register(
+            nameof(RedCName), typeof(CName), typeof(RedCNameEditor), new PropertyMetadata(default(CName)));
 
 
         public string Text
@@ -47,30 +47,22 @@ namespace WolvenKit.Views.Editors
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) => SetRedValue(TextBox.Text);
 
-        private void SetRedValue(string value)
-        {
-
-        }
+        private void SetRedValue(string value) => SetCurrentValue(RedCNameProperty, (CName)value);
 
         private string GetValueFromRedValue()
         {
-            // null exception here, RedString = null
-            if (RedString is null)
+            var redValue = (string)RedCName;
+            if (redValue is { } redString)
             {
-                return "";
+                return redString;
             }
-            var redvalue = (string)RedString;
-            if (redvalue is string redstring)
-            {
-                return redstring;
-            }
-            else if (redvalue is null)
+            else if (redValue is null)
             {
                 return "";
             }
             else
             {
-                throw new ArgumentException(nameof(redvalue));
+                throw new ArgumentException(nameof(redValue));
             }
         }
 

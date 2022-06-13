@@ -104,7 +104,7 @@ namespace WolvenKit.Views.Editors
         private string GetPathFromRedValue()
         {
             // this might need to be handled at the class level like enums
-            if (RedRef is null || RedRef.DepotPath is null)
+            if (RedRef is null || RedRef.DepotPath == "None")
             {
                 return "";
             }
@@ -115,15 +115,7 @@ namespace WolvenKit.Views.Editors
             return RedRef.DepotPath;
         }
 
-        private ulong GetHashFromRedValue()
-        {
-            // this might need to be handled at the class level like enums
-            if (RedRef is null)
-            {
-                return 0;
-            }
-            return RedRef.DepotPath?.GetRedHash() ?? 0;
-        }
+        private ulong GetHashFromRedValue() => RedRef.DepotPath;
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {

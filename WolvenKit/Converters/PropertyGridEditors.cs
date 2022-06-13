@@ -15,9 +15,17 @@ namespace WolvenKit.Converters
     {
         public static ITypeEditor GetPropertyEditor(Type PropertyType)
         {
-            if (PropertyType.IsAssignableTo(typeof(BaseStringType)))
+            if (PropertyType.IsAssignableTo(typeof(CName)))
             {
-                return new TextEditor();
+                return new CNameEditor();
+            }
+            if (PropertyType.IsAssignableTo(typeof(CString)))
+            {
+                return new CStringEditor();
+            }
+            if (PropertyType.IsAssignableTo(typeof(NodeRef)))
+            {
+                return new NodeRefEditor();
             }
             if (PropertyType.IsAssignableTo(typeof(IRedPrimitive<ulong>)))
             {
@@ -335,9 +343,9 @@ namespace WolvenKit.Converters
             }
         }
 
-        public class TextEditor : ITypeEditor
+        public class CNameEditor : ITypeEditor
         {
-            private RedStringEditor _editor;
+            private RedCNameEditor _editor;
 
             public void Attach(PropertyViewItem property, PropertyItem info)
             {
@@ -366,7 +374,89 @@ namespace WolvenKit.Converters
             }
             public object Create(PropertyInfo propertyInfo)
             {
-                _editor = new RedStringEditor();
+                _editor = new RedCNameEditor();
+
+                return _editor;
+            }
+            public void Detach(PropertyViewItem property)
+            {
+
+            }
+        }
+
+        public class CStringEditor : ITypeEditor
+        {
+            private RedCStringEditor _editor;
+
+            public void Attach(PropertyViewItem property, PropertyItem info)
+            {
+                if (info.CanWrite)
+                {
+                    var binding = new Binding("Value")
+                    {
+                        Mode = BindingMode.TwoWay,
+                        Source = info,
+                        ValidatesOnExceptions = true,
+                        ValidatesOnDataErrors = true,
+                    };
+                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                }
+                else
+                {
+                    _editor.SetCurrentValue(UIElement.IsEnabledProperty, false);
+                    var binding = new Binding("Value")
+                    {
+                        Source = info,
+                        ValidatesOnExceptions = true,
+                        ValidatesOnDataErrors = true
+                    };
+                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                }
+            }
+            public object Create(PropertyInfo propertyInfo)
+            {
+                _editor = new RedCStringEditor();
+
+                return _editor;
+            }
+            public void Detach(PropertyViewItem property)
+            {
+
+            }
+        }
+
+        public class NodeRefEditor : ITypeEditor
+        {
+            private RedNodeRefEditor _editor;
+
+            public void Attach(PropertyViewItem property, PropertyItem info)
+            {
+                if (info.CanWrite)
+                {
+                    var binding = new Binding("Value")
+                    {
+                        Mode = BindingMode.TwoWay,
+                        Source = info,
+                        ValidatesOnExceptions = true,
+                        ValidatesOnDataErrors = true,
+                    };
+                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                }
+                else
+                {
+                    _editor.SetCurrentValue(UIElement.IsEnabledProperty, false);
+                    var binding = new Binding("Value")
+                    {
+                        Source = info,
+                        ValidatesOnExceptions = true,
+                        ValidatesOnDataErrors = true
+                    };
+                    BindingOperations.SetBinding(_editor, RedStringEditor.RedStringProperty, binding);
+                }
+            }
+            public object Create(PropertyInfo propertyInfo)
+            {
+                _editor = new RedNodeRefEditor();
 
                 return _editor;
             }

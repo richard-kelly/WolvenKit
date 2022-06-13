@@ -7,6 +7,8 @@ namespace WolvenKit.Converters
 {
     internal class RedEditorTemplateSelector : DataTemplateSelector
     {
+        public DataTemplate RedCNameEditor { get; set; }
+        public DataTemplate RedCStringEditor { get; set; }
         public DataTemplate RedStringEditor { get; set; }
         public DataTemplate RedUlongEditor { get; set; }
         public DataTemplate RedTweakEditor { get; set; }
@@ -44,13 +46,17 @@ namespace WolvenKit.Converters
                 {
                     return RedTypeViewer;
                 }
+                if (vm.PropertyType.IsAssignableTo(typeof(CName)))
+                {
+                    return RedCNameEditor;
+                }
+                if (vm.PropertyType.IsAssignableTo(typeof(CString)))
+                {
+                    return RedCStringEditor;
+                }
                 if (vm.PropertyType.IsAssignableTo(typeof(NodeRef)))
                 {
                     return RedNodeRefEditor;
-                }
-                if (vm.PropertyType.IsAssignableTo(typeof(BaseStringType)))
-                {
-                    return RedStringEditor;
                 }
                 if (vm.PropertyType.IsAssignableTo(typeof(TweakDBID)))
                 {

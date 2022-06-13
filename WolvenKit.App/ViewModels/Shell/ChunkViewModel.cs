@@ -387,7 +387,7 @@ namespace WolvenKit.ViewModels.Shell
                 //    Properties.Add(new ChunkViewModel(record, this, "record"));
                 //}
             }
-            else if (obj is BaseStringType str)
+            else if (obj is CName str)
             {
                 var s = (string)str;
                 if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var locKey))
@@ -805,7 +805,7 @@ namespace WolvenKit.ViewModels.Shell
                         return type;
                     }
                 }
-                if (Data is BaseStringType str)
+                if (Data is CName str)
                 {
                     var s = (string)str;
                     if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var _))
@@ -891,7 +891,7 @@ namespace WolvenKit.ViewModels.Shell
                             count += 1;
                         }
                     }
-                    else if (ResolvedData is BaseStringType str)
+                    else if (ResolvedData is CName str)
                     {
                         var s = (string)str;
                         if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var locKey))
@@ -1065,32 +1065,45 @@ namespace WolvenKit.ViewModels.Shell
                 Value = "null";
             }
 
-            if (PropertyType.IsAssignableTo(typeof(BaseStringType)))
+            if (PropertyType.IsAssignableTo(typeof(CName)))
             {
-                var value = (BaseStringType)Data;
-                if (value is NodeRef rn)
+                if (Data is CName cName)
                 {
-                    if (rn.GetResolvedText() is var text && !string.IsNullOrEmpty(text))
+                    Value = cName;
+                    if (string.IsNullOrEmpty(Value))
                     {
-                        Value = text;
+                        Value = "null";
                     }
-                    else
+                    else if (Value.StartsWith("LocKey#") && ulong.TryParse(Value[7..], out var key))
                     {
-                        Value = rn.GetRedHash() != 0 ? rn.GetRedHash().ToString() : "null";
+                        Value = "";
+                    }
+                }
+            }
+            else if(PropertyType.IsAssignableTo(typeof(CString)))
+            {
+                if (Data is CString cString)
+                {
+                    Value = cString;
+                    if (string.IsNullOrEmpty(Value))
+                    {
+                        Value = "null";
+                    }
+                }
+            }
+            else if (PropertyType.IsAssignableTo(typeof(NodeRef)))
+            {
+                if (Data is NodeRef nr && nr != "None")
+                {
+                    Value = nr.ToString();
+                    if (Value == "0")
+                    {
+                        Value = "null";
                     }
                 }
                 else
                 {
                     Value = "null";
-                }
-                if (!string.IsNullOrEmpty(value))
-                {
-                    Value = value;
-                    if (Value is not null && Value.StartsWith("LocKey#") && ulong.TryParse(Value[7..], out var key))
-                    {
-                        Value = "";
-                        //    Value = Locator.Current.GetService<LocKeyService>().GetFemaleVariant(key);
-                    }
                 }
             }
             else if (PropertyType.IsAssignableTo(typeof(CByteArray)))
@@ -1214,7 +1227,7 @@ namespace WolvenKit.ViewModels.Shell
                 Descriptor = ((ulong)locKey).ToString();
                 //Value = Locator.Current.GetService<LocKeyService>().GetFemaleVariant(value);
             }
-            else if (Data is BaseStringType str)
+            else if (Data is CName str)
             {
                 var s = (string)str;
                 if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var locKey2))
@@ -1348,7 +1361,15 @@ namespace WolvenKit.ViewModels.Shell
                 {
                     return "SymbolNumeric";
                 }
-                if (PropertyType.IsAssignableTo(typeof(BaseStringType)))
+                if (PropertyType.IsAssignableTo(typeof(CName)))
+                {
+                    return "SymbolString";
+                }
+                if (PropertyType.IsAssignableTo(typeof(CString)))
+                {
+                    return "SymbolString";
+                }
+                if (PropertyType.IsAssignableTo(typeof(NodeRef)))
                 {
                     return "SymbolString";
                 }
@@ -1413,7 +1434,7 @@ namespace WolvenKit.ViewModels.Shell
         public bool CanBeDroppedOn(ChunkViewModel target) => PropertyType == target.PropertyType;
 
         public ICommand OpenRefCommand { get; private set; }
-        private bool CanOpenRef() => Data is IRedRef r && r.DepotPath is not null;
+        private bool CanOpenRef() => Data is IRedRef r && r.DepotPath != "None";
         private void ExecuteOpenRef()
         {
             if (Data is IRedRef r)
@@ -1434,7 +1455,7 @@ namespace WolvenKit.ViewModels.Shell
         }
 
         public ICommand AddRefCommand { get; private set; }
-        private bool CanAddRef() => Data is IRedRef r && r.DepotPath is not null;
+        private bool CanAddRef() => Data is IRedRef r && r.DepotPath != "None";
         private void ExecuteAddRef()
         {
             if (Data is IRedRef r)
@@ -1526,7 +1547,7 @@ namespace WolvenKit.ViewModels.Shell
                 }
                 var existing = new ObservableCollection<string>(AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(s => s.GetTypes())
-                    .Where(p => innerType.IsAssignableFrom(p) && p.IsClass)
+                    .Where(p => innerType.IsAssignableFrom(p) && (p.IsClass || p.IsValueType))
                     .Select(x => x.Name));
 
                 // no inheritable

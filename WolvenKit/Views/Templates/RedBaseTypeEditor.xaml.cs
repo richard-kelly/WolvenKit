@@ -51,9 +51,33 @@ namespace WolvenKit.Views.Editors
             {
                 return "null";
             }
-            else if (PropertyType.IsAssignableTo(typeof(BaseStringType)))
+            else if(PropertyType.IsAssignableTo(typeof(CName)))
             {
-                var value = (BaseStringType)RedType;
+                var value = (CName)RedType;
+                if (string.Equals(value, ""))
+                {
+                    return "null";
+                }
+                else
+                {
+                    return value;
+                }
+            }
+            else if (PropertyType.IsAssignableTo(typeof(CString)))
+            {
+                var value = (CString)RedType;
+                if (string.Equals(value, ""))
+                {
+                    return "null";
+                }
+                else
+                {
+                    return value;
+                }
+            }
+            else if (PropertyType.IsAssignableTo(typeof(NodeRef)))
+            {
+                var value = (NodeRef)RedType;
                 if (string.Equals(value, ""))
                 {
                     return "null";

@@ -10,9 +10,9 @@ namespace WolvenKit.Views.Editors
     /// <summary>
     /// Interaction logic for RedStringEditor.xaml
     /// </summary>
-    public partial class RedStringEditor : UserControl
+    public partial class RedCStringEditor : UserControl
     {
-        public RedStringEditor()
+        public RedCStringEditor()
         {
             InitializeComponent();
             //TextBox.TextChanged += TextBox_TextChanged;
@@ -30,13 +30,13 @@ namespace WolvenKit.Views.Editors
 
         }
 
-        public BaseStringType RedString
+        public CString RedCString
         {
-            get => (BaseStringType)GetValue(RedStringProperty);
-            set => SetValue(RedStringProperty, value);
+            get => (CString)GetValue(RedCStringProperty);
+            set => SetValue(RedCStringProperty, value);
         }
-        public static readonly DependencyProperty RedStringProperty = DependencyProperty.Register(
-            nameof(RedString), typeof(BaseStringType), typeof(RedStringEditor), new PropertyMetadata(default(BaseStringType)));
+        public static readonly DependencyProperty RedCStringProperty = DependencyProperty.Register(
+            nameof(RedCString), typeof(CString), typeof(RedCStringEditor), new PropertyMetadata(default(CString)));
 
 
         public string Text
@@ -47,33 +47,22 @@ namespace WolvenKit.Views.Editors
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) => SetRedValue(TextBox.Text);
 
-        private void SetRedValue(string value)
-        {
-
-        }
+        private void SetRedValue(string value) => SetCurrentValue(RedCStringProperty, (CString)value);
 
         private string GetValueFromRedValue()
         {
-            // null exception here, RedString = null
-            if (RedString is null)
+            var redValue = (string)RedCString;
+            if (redValue is { } redString)
+            {
+                return redString;
+            }
+
+            if (redValue is null)
             {
                 return "";
             }
-            var redvalue = (string)RedString;
-            if (redvalue is string redstring)
-            {
-                return redstring;
-            }
-            else if (redvalue is null)
-            {
-                return "";
-            }
-            else
-            {
-                throw new ArgumentException(nameof(redvalue));
-            }
+
+            throw new ArgumentException(nameof(redValue));
         }
-
-
     }
 }

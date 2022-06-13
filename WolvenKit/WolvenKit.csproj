@@ -1052,6 +1052,12 @@
     <Compile Update="Views\Templates\RedChunkMaskEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Templates\RedCString.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Templates\RedCNameEditor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Templates\RedUlongEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -1807,6 +1813,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Templates\RedChunkMaskEditor.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Templates\RedCString.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Templates\RedCNameEditor.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
