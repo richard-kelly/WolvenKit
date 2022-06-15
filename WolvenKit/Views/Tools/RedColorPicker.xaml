@@ -52,11 +52,14 @@
                         VerticalAlignment="Top"
                         HorizontalAlignment="Left">
                         <Label Content="Hex"/>
-                        <colorpicker:HexColorTextBox ColorState="{Binding ElementName=rcp, Path=ColorState, Mode=TwoWay}" />
+                        <colorpicker:HexColorTextBox
+                            ShowAlpha="{Binding ElementName=rcp, Path=ShowAlpha, Mode=TwoWay}"
+                            ColorState="{Binding ElementName=rcp, Path=ColorState, Mode=TwoWay}" />
                     </DockPanel>
                     <colorpicker:ColorSliders
                         Grid.Column="1"
                         Grid.Row="1"
+                        ShowAlpha="{Binding ElementName=rcp, Path=ShowAlpha, Mode=TwoWay}"
                         ColorState="{Binding ElementName=rcp, Path=ColorState, Mode=TwoWay}" />
                 </Grid>
             </Border>
