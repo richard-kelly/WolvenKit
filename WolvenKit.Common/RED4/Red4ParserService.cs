@@ -109,7 +109,24 @@ namespace WolvenKit.RED4.CR2W
 
             if (e is InvalidRTTIEventArgs e1)
             {
-                if (e1.ExpectedType == typeof(redResourceReferenceScriptToken) && e1.ActualType == typeof(CString))
+                if (e1.PropertyName == "WorldWidgetComponent.widgetResource" &&
+                    e1.ExpectedType == typeof(CResourceAsyncReference<inkWidgetLibraryResource>) &&
+                    e1.ActualType == typeof(CResourceReference<inkWidgetLibraryResource>))
+                {
+                    var orgValue = (CResourceReference<inkWidgetLibraryResource>)e1.Value;
+
+                    e1.Value = new CResourceAsyncReference<inkWidgetLibraryResource>
+                    {
+                        DepotPath = orgValue.DepotPath,
+                        Flags = orgValue.Flags
+                    };
+
+                    return true;
+                }
+
+                if (e1.PropertyName == "STvChannel.videoPath" &&
+                    e1.ExpectedType == typeof(redResourceReferenceScriptToken) &&
+                    e1.ActualType == typeof(CString))
                 {
                     var orgStr = (string)(CString)e1.Value;
 
@@ -120,9 +137,6 @@ namespace WolvenKit.RED4.CR2W
                             DepotPath = orgStr
                         }
                     };
-
-                    var logger = Locator.Current.GetService<ILoggerService>();
-                    logger?.Warning($"Invalid in wolven rtti: [Expected: \"{e1.ExpectedType.Name}\" | Got: \"{e1.ActualType.Name}\"]");
 
                     return true;
                 }

@@ -57,10 +57,10 @@ namespace WolvenKit.RED4.Archive.IO
 
                     if (fieldType != prop.Type)
                     {
-                        var args = new InvalidRTTIEventArgs(prop.Type, fieldType, value);
+                        var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{varName}";
+                        var args = new InvalidRTTIEventArgs(propName, prop.Type, fieldType, value);
                         if (!HandleParsingError(args))
                         {
-                            var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{varName}";
                             throw new InvalidRTTIException(propName, prop.Type, fieldType);
                             
                         }
