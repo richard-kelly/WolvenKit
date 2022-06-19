@@ -100,11 +100,20 @@ namespace WolvenKit.RED4.CR2W
             }
         }
 
-        private bool OnParsingError(ParsingErrorEventArgs e)
+        private HandlerResult OnParsingError(ParsingErrorEventArgs e)
         {
             if (e is InvalidDefaultValueEventArgs)
             {
-                return true;
+                return HandlerResult.Ignore;
+            }
+
+            if (e is UnknownRTTIEventArgs { RedTypeInfo: SpecialRedTypeInfo srti })
+            {
+                // yeeted in CP v???
+                if (srti.RedName == "gameVisionModuleParams")
+                {
+                    return HandlerResult.Skip;
+                }
             }
 
             if (e is InvalidRTTIEventArgs e1)
@@ -121,7 +130,7 @@ namespace WolvenKit.RED4.CR2W
                         Flags = orgValue.Flags
                     };
 
-                    return true;
+                    return HandlerResult.Modified;
                 }
 
                 if (e1.PropertyName == "STvChannel.videoPath" &&
@@ -138,11 +147,11 @@ namespace WolvenKit.RED4.CR2W
                         }
                     };
 
-                    return true;
+                    return HandlerResult.Modified;
                 }
             }
 
-            return false;
+            return HandlerResult.NotHandled;
         }
 
         /// <summary>

@@ -53,7 +53,7 @@ public partial class ModTools
                 ms.Seek(0, SeekOrigin.Begin);
 
                 using var reader = new CR2WReader(ms);
-                reader.ParsingError += args => args is InvalidDefaultValueEventArgs;
+                reader.ParsingError += args => args is InvalidDefaultValueEventArgs ? HandlerResult.Skip : HandlerResult.NotHandled;
 
                 if (reader.ReadFile(out var file) != EFileReadErrorCodes.NoError)
                 {

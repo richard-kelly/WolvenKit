@@ -50,7 +50,17 @@ namespace WolvenKit.RED4.Archive.IO
         #region ErrorHandler
 
         public event ParsingErrorEventHandler ParsingError;
-        protected virtual bool HandleParsingError(ParsingErrorEventArgs e) => ParsingError != null && ParsingError.Invoke(e);
+        protected virtual HandlerResult HandleParsingError(ParsingErrorEventArgs e)
+        {
+            var result = HandlerResult.NotHandled;
+
+            if (result == HandlerResult.NotHandled && ParsingError != null)
+            {
+                result = ParsingError.Invoke(e);
+            }
+
+            return result;
+        }
 
         #endregion
     }

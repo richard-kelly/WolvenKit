@@ -93,6 +93,7 @@ namespace WolvenKit.RED4.Archive.IO
             var sizepos = _reader.BaseStream.Position;
             var size = _reader.ReadUInt32();
 
+            var tmp = RedReflection.GetRedTypeInfos(typename);
             var (type, flags) = RedReflection.GetCSTypeFromRedType(typename);
 
             var typeInfo = RedReflection.GetTypeInfo(cls);
@@ -117,7 +118,7 @@ namespace WolvenKit.RED4.Archive.IO
                 if (type != prop.Type)
                 {
                     var args = new InvalidRTTIEventArgs(propName, prop.Type, type, value);
-                    if (!HandleParsingError(args))
+                    if (HandleParsingError(args) == HandlerResult.NotHandled)
                     {
                         throw new InvalidRTTIException(propName, prop.Type, type);
                     }
@@ -127,7 +128,7 @@ namespace WolvenKit.RED4.Archive.IO
                 if (!typeInfo.SerializeDefault && !prop.SerializeDefault && RedReflection.IsDefault(cls.GetType(), varName, value))
                 {
                     var args = new InvalidDefaultValueEventArgs();
-                    if (!HandleParsingError(args))
+                    if (HandleParsingError(args) == HandlerResult.NotHandled)
                     {
                         throw new InvalidParsingException($"Invalid default val for: \"{propName}\"");
                     }

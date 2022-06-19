@@ -252,7 +252,7 @@ public class TweakDBReader : Red4Reader
                 {
                     var propName = $"{RedReflection.GetRedTypeFromCSType(instance.GetType())}.{varName}";
                     var args = new InvalidRTTIEventArgs(propName, propertyInfo.Type, valueType, value);
-                    if (!HandleParsingError(args))
+                    if (HandleParsingError(args) == HandlerResult.NotHandled)
                     {
                         throw new InvalidRTTIException(propName, propertyInfo.Type, valueType);
 
@@ -260,7 +260,6 @@ public class TweakDBReader : Red4Reader
                     value = args.Value;
                 }
 
-                
                 instance.SetProperty(propertyInfo.RedName, value);
             }
         }

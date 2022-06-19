@@ -555,9 +555,25 @@ namespace WolvenKit.RED4.IO
             throw new NotSupportedException($"{nameof(Red4Reader)}.{callerMemberName}");
         }
 
+        public static event ParsingErrorEventHandler GlobalParsingError;
         public event ParsingErrorEventHandler ParsingError;
 
-        protected virtual bool HandleParsingError(ParsingErrorEventArgs e) => ParsingError != null && ParsingError.Invoke(e);
+        protected virtual HandlerResult HandleParsingError(ParsingErrorEventArgs e)
+        {
+            var result = HandlerResult.NotHandled;
+
+            if (result == HandlerResult.NotHandled && GlobalParsingError != null)
+            {
+                result = GlobalParsingError.Invoke(e);
+            }
+
+            if (result == HandlerResult.NotHandled && ParsingError != null)
+            {
+                result = ParsingError.Invoke(e);
+            }
+
+            return result;
+        }
 
         #endregion
 

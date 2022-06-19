@@ -2,9 +2,17 @@ using System;
 
 namespace WolvenKit.RED4.Types;
 
+public enum HandlerResult
+{
+    NotHandled,
+    Modified,
+    Ignore,
+    Skip
+}
+
 public abstract class ParsingErrorEventArgs : EventArgs { }
 
-public delegate bool ParsingErrorEventHandler(ParsingErrorEventArgs e);
+public delegate HandlerResult ParsingErrorEventHandler(ParsingErrorEventArgs e);
 
 public class InvalidRTTIEventArgs : ParsingErrorEventArgs
 {
@@ -25,4 +33,14 @@ public class InvalidRTTIEventArgs : ParsingErrorEventArgs
 public class InvalidDefaultValueEventArgs : ParsingErrorEventArgs
 {
 
+}
+
+public class UnknownRTTIEventArgs : ParsingErrorEventArgs
+{
+    public RedTypeInfo RedTypeInfo { get; }
+
+    public UnknownRTTIEventArgs(RedTypeInfo redTypeInfo)
+    {
+        RedTypeInfo = redTypeInfo;
+    }
 }

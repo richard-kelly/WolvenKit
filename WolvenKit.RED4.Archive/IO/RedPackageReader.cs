@@ -35,6 +35,33 @@ namespace WolvenKit.RED4.Archive.IO
             {
                 var varName = GetStringValue(f.nameID);
                 var typeName = GetStringValue(f.typeID);
+
+                var skip = false;
+                var redTypes = RedReflection.GetRedTypeInfos(typeName);
+                for (var i = 0; i < redTypes.Count; i++)
+                {
+                    if (redTypes[i] is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed } srti)
+                    {
+                        var args = new UnknownRTTIEventArgs(srti);
+                        switch (HandleParsingError(args))
+                        {
+                            case HandlerResult.NotHandled:
+                                throw new TypeNotFoundException(srti.RedName);
+                            case HandlerResult.Modified:
+                                redTypes[i] = args.RedTypeInfo;
+                                break;
+                            case HandlerResult.Skip:
+                                skip = true;
+                                break;
+                        }
+                    }
+                }
+
+                if (skip)
+                {
+                    continue;
+                }
+
                 var (fieldType, flags) = RedReflection.GetCSTypeFromRedType(typeName);
 
                 var prop = typeInfo.GetPropertyInfoByRedName(varName);
@@ -59,7 +86,7 @@ namespace WolvenKit.RED4.Archive.IO
                     {
                         var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{varName}";
                         var args = new InvalidRTTIEventArgs(propName, prop.Type, fieldType, value);
-                        if (!HandleParsingError(args))
+                        if (HandleParsingError(args) == HandlerResult.NotHandled)
                         {
                             throw new InvalidRTTIException(propName, prop.Type, fieldType);
                             
