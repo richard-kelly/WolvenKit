@@ -3,6 +3,7 @@ using WolvenKit.Common.FNV1A;
 using WolvenKit.RED4.IO;
 using WolvenKit.RED4.Save.IO;
 using WolvenKit.RED4.Types;
+using WolvenKit.RED4.Types.Exceptions;
 
 namespace WolvenKit.RED4.Save;
 
@@ -66,7 +67,9 @@ public class PersistencySystem2Reader : Red4Reader
                 throw new Exception();
             }
 
-            var value = Read(propertyInfo.Type, (uint)Remaining, propertyInfo.Flags);
+            var redTypeInfos = RedReflection.GetRedTypeInfos(propertyInfo.RedType);
+            var value = Read(redTypeInfos, (uint)Remaining);
+
             instance.SetProperty(propertyInfo.RedName, value);
         }
 
@@ -85,68 +88,64 @@ public class PersistencySystem2Reader : Red4Reader
         return BaseReader.ReadUInt64();
     }
 
-    public override CEnum<T> ReadCEnum<T>()
+    public override IRedEnum ReadCEnum(List<RedTypeInfo> redTypeInfos, uint size)
     {
-        var remaining = Remaining;
-        var sizeType = Enum.GetUnderlyingType(typeof(T));
-        
+        if (redTypeInfos.Count != 1)
+        {
+            throw new TodoException();
+        }
+
+        var type = RedReflection.GetFullType(redTypeInfos);
+        var sizeType = Enum.GetUnderlyingType(type);
+
         if (sizeType == typeof(sbyte))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadSByte());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadSByte());
         }
         if (sizeType == typeof(byte))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadByte());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadByte());
         }
         if (sizeType == typeof(short))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadInt16());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadInt16());
         }
         if (sizeType == typeof(ushort))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadUInt16());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadUInt16());
         }
         if (sizeType == typeof(int))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadInt32());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadInt32());
         }
         if (sizeType == typeof(uint))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadUInt32());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadUInt32());
         }
         if (sizeType == typeof(long))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadInt64());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadInt64());
         }
         if (sizeType == typeof(ulong))
         {
-            return (Enum)Enum.ToObject(typeof(T), BaseReader.ReadUInt64());
+            return (IRedEnum)Enum.ToObject(type, BaseReader.ReadUInt64());
         }
 
         throw new Exception();
     }
 
-    public override IRedHandle<T> ReadCHandle<T>()
+    public override IRedHandle ReadCHandle(List<RedTypeInfo> redTypeInfos, uint size)
     {
         var clsType = ClassHashHelper.GetTypeFromHash(BaseReader.ReadUInt64())!;
-        return (CHandle<T>)ReadClass(clsType, (uint)Remaining);
+
+        var type = RedReflection.GetFullType(redTypeInfos);
+        var result = (IRedHandle)System.Activator.CreateInstance(type);
+        result.SetValue(ReadClass(clsType, (uint)Remaining));
+
+        return result;
     }
 
-    public override IRedArray<T> ReadCArray<T>(uint size)
-    {
-        var array = new CArray<T>();
-
-        var elementCount = _reader.ReadUInt32();
-
-        var i = 0;
-        for (; i < elementCount; i++)
-        {
-            var element = ReadArrayItem(i, typeof(T), Flags.Empty);
-            array.Add((T)element);
-        }
-
-        return array;
-    }
+    public override IRedArray ReadCArray(List<RedTypeInfo> redTypeInfos, uint size, bool readAdditionalBytes = true) => base.ReadCArray(redTypeInfos, size, false);
 }
 
 public class PersistencySystem2Writer : Red4Writer

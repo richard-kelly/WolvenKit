@@ -14,6 +14,7 @@ using WolvenKit.Modkit.RED4;
 using WolvenKit.RED4.Archive;
 using WolvenKit.RED4.Archive.IO;
 using WolvenKit.RED4.CR2W;
+using WolvenKit.RED4.Types;
 
 namespace WolvenKit.Utility
 {
@@ -276,7 +277,7 @@ namespace WolvenKit.Utility
                         ms.Seek(0, SeekOrigin.Begin);
 
                         using var reader = new CR2WReader(ms);
-                        reader.ParsingError += args => true;
+                        reader.ParsingError += args => HandlerResult.Ignore;
 
                         reader.CollectData = true;
 

@@ -32,13 +32,15 @@ namespace WolvenKit.RED4.Archive.IO
 
         public override void ReadClass(RedBaseClass cls, uint size)
         {
+            var typeInfo = RedReflection.GetTypeInfo(cls);
+
             if (cls is IRedCustomData customCls)
             {
                 customCls.CustomRead(this, size);
                 return;
             }
 
-            var startpos = _reader.BaseStream.Position;
+            var startPos = _reader.BaseStream.Position;
 
             #region initial checks
 
@@ -52,100 +54,58 @@ namespace WolvenKit.RED4.Archive.IO
             #endregion
 
             #region parse sequential variables
+
             while (true)
             {
-                var cvar = ReadVariable(cls);
-                if (!cvar)
+                #region Header
+
+                var propRedName = ReadCName();
+                if (propRedName == "")
                 {
                     break;
                 }
-            }
-            #endregion
 
-            var endpos = _reader.BaseStream.Position;
-            var bytesread = endpos - startpos;
+                var propRedType = ReadCName();
+                var propSize = _reader.ReadUInt32() - 4;
 
-            if (cls is IRedAppendix app)
-            {
-                app.Read(this, (uint)(size - bytesread));
-            }
+                #endregion
 
-            if (bytesread != size)
-            {
-                //throw new InvalidParsingException($"Read bytes not equal to expected bytes. Difference: {bytesread - size}");
-            }
-        }
-
-        public bool ReadVariable(RedBaseClass cls)
-        {
-            var nameId = _reader.ReadUInt16();
-            if (nameId == 0)
-            {
-                return false;
-            }
-            var varName = GetStringValue(nameId);
-
-            // Read Type
-            var typeId = _reader.ReadUInt16();
-            var typename = GetStringValue(typeId);
-
-            // Read Size
-            var sizepos = _reader.BaseStream.Position;
-            var size = _reader.ReadUInt32();
-
-            var tmp = RedReflection.GetRedTypeInfos(typename);
-            var (type, flags) = RedReflection.GetCSTypeFromRedType(typename);
-
-            var typeInfo = RedReflection.GetTypeInfo(cls);
-
-            IRedType value;
-            var prop = RedReflection.GetPropertyByRedName(cls.GetType(), varName);
-            if (prop == null)
-            {
-                prop = typeInfo.AddDynamicProperty(varName, typename);
-            }
-
-            if (prop.IsDynamic)
-            {
-                value = Read(type, size - 4, flags);
-                cls.SetProperty(varName, value);
-            }
-            else
-            {
-                value = Read(prop.Type, size - 4, prop.Flags.Clone());
-
-                var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{varName}";
-                if (type != prop.Type)
+                var nativeProp = RedReflection.GetNativePropertyInfo(cls.GetType(), propRedName);
+                if (nativeProp == null)
                 {
-                    var args = new InvalidRTTIEventArgs(propName, prop.Type, type, value);
-                    if (HandleParsingError(args) == HandlerResult.NotHandled)
-                    {
-                        throw new InvalidRTTIException(propName, prop.Type, type);
-                    }
-                    value = args.Value;
+                    // Handle dynamic props
+                    throw new DoNotMergeIntoMainBeforeFixedException();
                 }
 
-                if (!typeInfo.SerializeDefault && !prop.SerializeDefault && RedReflection.IsDefault(cls.GetType(), varName, value))
+                var redTypeInfos = RedReflection.GetRedTypeInfos(propRedType);
+                foreach (var redTypeInfo in redTypeInfos)
                 {
-                    var args = new InvalidDefaultValueEventArgs();
-                    if (HandleParsingError(args) == HandlerResult.NotHandled)
+                    if (redTypeInfo is SpecialRedTypeInfo)
                     {
-                        throw new InvalidParsingException($"Invalid default val for: \"{propName}\"");
+                        // Handle unknown rtti type
+                        throw new DoNotMergeIntoMainBeforeFixedException();
                     }
                 }
 
-                cls.SetProperty(prop.RedName, value);
-            }
+                if (nativeProp.Type != RedReflection.GetFullType(redTypeInfos))
+                {
+                    // Handle type mismatch
+                    throw new DoNotMergeIntoMainBeforeFixedException();
+                }
 
-            PostProcess();
+                var value = Read(redTypeInfos, propSize);
 
-            return true;
+                if (!typeInfo.SerializeDefault && !nativeProp.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propRedName, value))
+                {
+                    // Handle invalid default value
+                    throw new DoNotMergeIntoMainBeforeFixedException();
+                }
 
-            void PostProcess()
-            {
+                #region Post processing
+
                 if (value is IRedBufferPointer buf)
                 {
-                    buf.GetValue().ParentTypes.Add($"{cls.GetType().Name}.{varName}");
+                    buf.GetValue().ParentTypes.Add($"{cls.GetType().Name}.{propRedName}");
                     buf.GetValue().Parent = cls;
                 }
 
@@ -155,11 +115,30 @@ namespace WolvenKit.RED4.Archive.IO
                     {
                         foreach (IRedBufferPointer entry in arr)
                         {
-                            entry.GetValue().ParentTypes.Add($"{cls.GetType().Name}.{varName}");
+                            entry.GetValue().ParentTypes.Add($"{cls.GetType().Name}.{propRedName}");
                             entry.GetValue().Parent = cls;
                         }
                     }
                 }
+
+                #endregion Post processing
+
+                cls.SetProperty(propRedName, value);
+            }
+
+            #endregion
+
+            var endPos = _reader.BaseStream.Position;
+            var bytesRead = endPos - startPos;
+
+            if (cls is IRedAppendix app)
+            {
+                app.Read(this, (uint)(size - bytesRead));
+            }
+
+            if (bytesRead != size)
+            {
+                //throw new InvalidParsingException($"Read bytes not equal to expected bytes. Difference: {bytesread - size}");
             }
         }
 

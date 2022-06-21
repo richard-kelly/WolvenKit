@@ -126,13 +126,13 @@ namespace WolvenKit.RED4.Archive.IO
             var newChunks = new List<RedBaseClass>();
             for (var i = 0; i < chunks.Count; i++)
             {
-                if (!HandleQueue.ContainsKey(i))
+                if (!_handleQueue.ContainsKey(i))
                 {
                     newChunks.Add(chunks[i]);
                     continue;
                 }
 
-                foreach (var handle in HandleQueue[i])
+                foreach (var handle in _handleQueue[i])
                 {
                     handle.SetValue(chunks[i]);
                 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using WolvenKit.Core.Extensions;
 using WolvenKit.RED4.Archive.Buffer;
@@ -28,74 +29,47 @@ namespace WolvenKit.RED4.Archive.IO
 
             var baseOff = BaseStream.Position;
             var fieldCount = _reader.ReadUInt16();
-            //var unk = _reader.ReadUInt16();
             var fields = BaseStream.ReadStructs<RedPackageFieldHeader>(fieldCount);
 
             foreach (var f in fields)
             {
-                var varName = GetStringValue(f.nameID);
-                var typeName = GetStringValue(f.typeID);
+                var propRedName = GetStringValue(f.nameID);
+                var propRedType = GetStringValue(f.typeID);
 
-                var skip = false;
-                var redTypes = RedReflection.GetRedTypeInfos(typeName);
-                for (var i = 0; i < redTypes.Count; i++)
+                var nativeProp = RedReflection.GetNativePropertyInfo(cls.GetType(), propRedName);
+                if (nativeProp == null)
                 {
-                    if (redTypes[i] is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed } srti)
+                    // Handle dynamic props
+                    throw new DoNotMergeIntoMainBeforeFixedException();
+                }
+
+                var redTypeInfos = RedReflection.GetRedTypeInfos(propRedType);
+                foreach (var redTypeInfo in redTypeInfos)
+                {
+                    if (redTypeInfo is SpecialRedTypeInfo)
                     {
-                        var args = new UnknownRTTIEventArgs(srti);
-                        switch (HandleParsingError(args))
-                        {
-                            case HandlerResult.NotHandled:
-                                throw new TypeNotFoundException(srti.RedName);
-                            case HandlerResult.Modified:
-                                redTypes[i] = args.RedTypeInfo;
-                                break;
-                            case HandlerResult.Skip:
-                                skip = true;
-                                break;
-                        }
+                        // Handle unknown rtti type
+                        throw new DoNotMergeIntoMainBeforeFixedException();
                     }
                 }
 
-                if (skip)
+                if (nativeProp.Type != RedReflection.GetFullType(redTypeInfos))
                 {
-                    continue;
+                    // Handle type mismatch
+                    throw new DoNotMergeIntoMainBeforeFixedException();
                 }
-
-                var (fieldType, flags) = RedReflection.GetCSTypeFromRedType(typeName);
-
-                var prop = typeInfo.GetPropertyInfoByRedName(varName);
-                if (prop == null)
-                {
-                    prop = typeInfo.AddDynamicProperty(varName, typeName);
-                }
-
-                IRedType value;
 
                 BaseStream.Position = baseOff + f.offset;
-                if (prop.IsDynamic)
-                {
-                    value = Read(fieldType, 0, Flags.Empty);
-                    cls.SetProperty(varName, value);
-                }
-                else
-                {
-                    value = Read(fieldType, 0, flags);
 
-                    if (fieldType != prop.Type)
-                    {
-                        var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{varName}";
-                        var args = new InvalidRTTIEventArgs(propName, prop.Type, fieldType, value);
-                        if (HandleParsingError(args) == HandlerResult.NotHandled)
-                        {
-                            throw new InvalidRTTIException(propName, prop.Type, fieldType);
-                            
-                        }
-                        value = args.Value;
-                    }
+                var value = Read(redTypeInfos);
 
-                    cls.SetProperty(prop.RedName, value);
+                if (!typeInfo.SerializeDefault && !nativeProp.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propRedName, value))
+                {
+                    // Handle invalid default value
+                    throw new DoNotMergeIntoMainBeforeFixedException();
                 }
+
+                cls.SetProperty(propRedName, value);
             }
         }
 
@@ -115,8 +89,13 @@ namespace WolvenKit.RED4.Archive.IO
             throw new NotImplementedException(nameof(ReadTweakDBID));
         }
 
-        public override CBitField<T> ReadCBitField<T>()
+        public override IRedBitField ReadCBitField(List<RedTypeInfo> redTypeInfos, uint size)
         {
+            if (redTypeInfos.Count != 1)
+            {
+                throw new TodoException();
+            }
+
             var cnt = _reader.ReadByte();
 
             var enumString = "";
@@ -136,17 +115,18 @@ namespace WolvenKit.RED4.Archive.IO
                 enumString += GetStringValue(index);
             }
 
+            var type = RedReflection.GetFullType(redTypeInfos);
             if (string.IsNullOrEmpty(enumString))
             {
-                return default(T);
+                return (IRedBitField)System.Activator.CreateInstance(type);
             }
-
-            return Enum.Parse<T>(enumString);
+            return (IRedBitField)System.Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { Enum.Parse(redTypeInfos[0].RedObjectType, enumString) }, null);
         }
 
-        public override IRedHandle<T> ReadCHandle<T>()
+        public override IRedHandle ReadCHandle(List<RedTypeInfo> redTypeInfos, uint size)
         {
-            var handle = new CHandle<T>();
+            var type = RedReflection.GetFullType(redTypeInfos);
+            var result = (IRedHandle)System.Activator.CreateInstance(type);
 
             int pointer;
             if (header.version == 2)
@@ -162,78 +142,89 @@ namespace WolvenKit.RED4.Archive.IO
                 throw new NotImplementedException(nameof(ReadCHandle));
             }
 
-            if (!HandleQueue.ContainsKey(pointer))
+            if (!_handleQueue.ContainsKey(pointer))
             {
-                HandleQueue.Add(pointer, new List<IRedBaseHandle>());
+                _handleQueue.Add(pointer, new List<IRedBaseHandle>());
             }
 
-            HandleQueue[pointer].Add(handle);
+            _handleQueue[pointer].Add(result);
 
-            return handle;
+            return result;
         }
 
-        public override IRedWeakHandle<T> ReadCWeakHandle<T>()
+        public override IRedWeakHandle ReadCWeakHandle(List<RedTypeInfo> redTypeInfos, uint size)
         {
-            var handle = new CWeakHandle<T>();
+            var type = RedReflection.GetFullType(redTypeInfos);
+            var result = (IRedWeakHandle)System.Activator.CreateInstance(type);
 
             var pointer = _reader.ReadInt32();
-            if (!HandleQueue.ContainsKey(pointer))
+            if (!_handleQueue.ContainsKey(pointer))
             {
-                HandleQueue.Add(pointer, new List<IRedBaseHandle>());
+                _handleQueue.Add(pointer, new List<IRedBaseHandle>());
             }
 
-            HandleQueue[pointer].Add(handle);
+            _handleQueue[pointer].Add(result);
 
-            return handle;
+            return result;
         }
 
-        public override IRedResourceAsyncReference<T> ReadCResourceAsyncReference<T>()
+        public override IRedResourceAsyncReference ReadCResourceAsyncReference(List<RedTypeInfo> redTypeInfos, uint size)
         {
+            if (redTypeInfos.Count != 2)
+            {
+                throw new TodoException();
+            }
+
+            var type = RedReflection.GetFullType(redTypeInfos);
+            var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type);
+
             var index = _reader.ReadInt16();
 
             if (index >= 0 && index < importsList.Count)
             {
                 var import = (PackageImport)importsList[index - 0];
 
-                return new CResourceAsyncReference<T>
-                {
-                    DepotPath = import.DepotPath != "" ? import.DepotPath : import.Hash,
-                    Flags = import.Flags
-                };
+                result.DepotPath = import.DepotPath != "" ? import.DepotPath : import.Hash;
+                result.Flags = import.Flags;
             }
-
-            return new CResourceAsyncReference<T>
+            else
             {
                 // TODO: Find a better way (written as -1)
-                DepotPath = "INVALID",
-                Flags = InternalEnums.EImportFlags.Default
-            };
+                result.DepotPath = "INVALID";
+                result.Flags = InternalEnums.EImportFlags.Default;
+            }
+
+            return result;
         }
 
-        public override IRedResourceReference<T> ReadCResourceReference<T>()
+        public override IRedResourceReference ReadCResourceReference(List<RedTypeInfo> redTypeInfos, uint size)
         {
+            if (redTypeInfos.Count != 2)
+            {
+                throw new TodoException();
+            }
+
+            var type = RedReflection.GetFullType(redTypeInfos);
+            var result = (IRedResourceReference)System.Activator.CreateInstance(type);
+
             var index = _reader.ReadInt16();
 
             if (index >= 0 && index < importsList.Count)
             {
                 var import = (PackageImport)importsList[index - 0];
 
-                return new CResourceReference<T>
-                {
-                    DepotPath = import.DepotPath != "" ? import.DepotPath : import.Hash,
-                    Flags = import.Flags
-                };
+                result.DepotPath = import.DepotPath != "" ? import.DepotPath : import.Hash;
+                result.Flags = import.Flags;
             }
-
-            return new CResourceReference<T>
+            else
             {
                 // TODO: Find a better way (written as -1)
-                DepotPath = "INVALID",
-                Flags = InternalEnums.EImportFlags.Default
-            };
-        }
+                result.DepotPath = "INVALID";
+                result.Flags = InternalEnums.EImportFlags.Default;
+            }
 
-        public override DataBuffer ReadDataBuffer() => base.ReadDataBuffer();
+            return result;
+        }
 
         public override NodeRef ReadNodeRef()
         {

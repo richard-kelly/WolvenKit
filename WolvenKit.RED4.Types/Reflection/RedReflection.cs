@@ -159,6 +159,41 @@ namespace WolvenKit.RED4.Types
             return _redEnumCache.FirstOrDefault(t => t.Value.Type == type).Value;
         }
 
+        public static Type GetFullType(List<RedTypeInfo> redTypeInfos)
+        {
+            Type result = null;
+
+            for (int i = redTypeInfos.Count - 1; i >= 0; i--)
+            {
+                if (result == null)
+                {
+                    if (redTypeInfos[i].BaseRedType is BaseRedType.Class)
+                    {
+                        result = redTypeInfos[i].RedObjectType;
+                    }
+                    else if (redTypeInfos[i].BaseRedType is BaseRedType.Enum or BaseRedType.BitField)
+                    {
+                        result = redTypeInfos[i].MappedType.MakeGenericType(redTypeInfos[i].RedObjectType);
+                    }
+                    else
+                    {
+                        result = redTypeInfos[i].MappedType;
+                    }
+                }
+                else
+                {
+                    result = redTypeInfos[i].MappedType.MakeGenericType(result);
+                }
+            }
+
+            return result;
+        }
+
+        public static List<RedTypeInfo> GetRedTypeInfos(Type type)
+        {
+            return GetRedTypeInfos(GetRedTypeFromCSType(type));
+        }
+
         public static List<RedTypeInfo> GetRedTypeInfos(string redTypeName)
         {
             var result = new List<RedTypeInfo>();
@@ -274,20 +309,23 @@ namespace WolvenKit.RED4.Types
                         result.Add(new FundamentalRedTypeInfo(Enum.Parse<FundamentalRedType>(str)));
                         break;
 
-                    case "Vector4":
-                        result.Add(new SpecialRedTypeInfo(SpecialRedType.Vector4));
-                        break;
-
                     default:
                         if (_redTypeCache.TryGetValue(str, out var type1) && type1.IsAssignableTo(typeof(RedBaseClass)))
                         {
-                            result.Add(new RedTypeInfo(BaseRedType.Class));
+                            result.Add(new RedTypeInfo(BaseRedType.Class, type1));
                             break;
                         }
 
                         if (_redEnumCache.TryGetValue(str, out var type2))
                         {
-                            result.Add(new RedTypeInfo(BaseRedType.Enum));
+                            if (type2.IsBitfield)
+                            {
+                                result.Add(new RedTypeInfo(BaseRedType.BitField, type2.Type));
+                            }
+                            else
+                            {
+                                result.Add(new RedTypeInfo(BaseRedType.Enum, type2.Type));
+                            }
                             break;
                         }
 
@@ -833,6 +871,7 @@ namespace WolvenKit.RED4.Types
 
                 Name = propertyInfo.Name;
                 Type = propertyInfo.PropertyType;
+
                 if (Type.IsGenericType)
                 {
                     GenericType = Type.GetGenericTypeDefinition();

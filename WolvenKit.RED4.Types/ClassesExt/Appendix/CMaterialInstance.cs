@@ -18,13 +18,14 @@ namespace WolvenKit.RED4.Types
             for (int i = 0; i < entryCount; i++)
             {
                 var valueSize = reader.BaseReader.ReadInt32() - 8;
-                var name = reader.ReadCName();
-                var typename = reader.ReadCName();
 
-                var (type, flags) = RedReflection.GetCSTypeFromRedType(typename);
-                var value = reader.Read(type, (uint)valueSize, flags);
+                var redName = reader.ReadCName();
+                var redType = reader.ReadCName();
 
-                Values.Add(new CKeyValuePair(name, value));
+                var redTypeInfos = RedReflection.GetRedTypeInfos(redType);
+                var value = reader.Read(redTypeInfos, (uint)valueSize);
+
+                Values.Add(new CKeyValuePair(redName, value));
             }
         }
 

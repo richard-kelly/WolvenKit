@@ -15,7 +15,7 @@ public class TweakDBReader : Red4Reader
 {
     private const uint s_recordSeed = 0x5EEDBA5E;
 
-    private static readonly Dictionary<ulong, Type> s_typeHashes = new();
+    private static readonly Dictionary<ulong, string> s_typeHashes = new();
     private static readonly Dictionary<uint, Type> s_recordHashes = new();
 
     public TweakDBReader(Stream input) : base(input)
@@ -43,8 +43,8 @@ public class TweakDBReader : Red4Reader
 
             var redName = RedReflection.GetRedTypeFromCSType(type);
 
-            s_typeHashes.Add(FNV1A64HashAlgorithm.HashString(redName), type);
-            s_typeHashes.Add(FNV1A64HashAlgorithm.HashString($"array:{redName}"), arrType);
+            s_typeHashes.Add(FNV1A64HashAlgorithm.HashString(redName), redName);
+            s_typeHashes.Add(FNV1A64HashAlgorithm.HashString($"array:{redName}"), $"array:{redName}");
         }
 
         var gameDataRegex = new Regex("gamedata(.*)_Record");
@@ -102,11 +102,12 @@ public class TweakDBReader : Red4Reader
         {
             flatTypeValues[typeHash] = new List<IRedType>();
             var type = s_typeHashes[typeHash];
+            var redTypeInfos = RedReflection.GetRedTypeInfos(type);
 
             var numValues = BaseReader.ReadUInt32();
             for (int j = 0; j < numValues; j++)
             {
-                flatTypeValues[typeHash].Add(Read(type));
+                flatTypeValues[typeHash].Add(Read(redTypeInfos));
             }
 
             var numKeys = BaseReader.ReadUInt32();
@@ -198,72 +199,82 @@ public class TweakDBReader : Red4Reader
 
     public override CName ReadCName() => BaseReader.ReadLengthPrefixedString();
 
-    public override IRedArray<T> ReadCArray<T>(uint size)
+    public override IRedResourceAsyncReference ReadCResourceAsyncReference(List<RedTypeInfo> redTypeInfos, uint size)
     {
-        var array = new CArray<T>();
-
-        var cnt = BaseReader.ReadInt32();
-        for (int i = 0; i < cnt; i++)
+        if (redTypeInfos.Count != 2)
         {
-            array.Add(Read(typeof(T)));
+            throw new TodoException();
         }
 
-        return array;
+        var type = RedReflection.GetFullType(redTypeInfos);
+        var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type);
+
+        result.DepotPath = BaseReader.ReadUInt64();
+
+        return result;
     }
 
-    public override IRedResourceAsyncReference<T> ReadCResourceAsyncReference<T>() =>
-        new CResourceAsyncReference<T>
-        {
-            DepotPath = BaseReader.ReadUInt64()
-        };
-
-    public override RedBaseClass ReadClass(Type type, uint size)
+    public override void ReadClass(RedBaseClass cls, uint size)
     {
-        var instance = RedTypeManager.Create(type);
+        var typeInfo = RedReflection.GetTypeInfo(cls.GetType());
 
-        var unk1 = BaseReader.ReadByte();
+        #region initial checks
 
-        var typeInfo = RedReflection.GetTypeInfo(instance);
+        // ... okay CDPR, is that a joke or what?
+        int zero = _reader.ReadByte();
+        if (zero != 0)
+        {
+            throw new Exception($"Tried parsing a CVariable: zero read {zero}.");
+        }
+
+        #endregion
+
         while (true)
         {
-            var varName = BaseReader.ReadLengthPrefixedString();
-            if (varName == "None")
+            #region Header
+
+            var propRedName = BaseReader.ReadLengthPrefixedString();
+            if (propRedName == "None")
             {
                 break;
             }
-            var valueTypeName = BaseReader.ReadLengthPrefixedString();
-            var (valueType, valueFlags) = RedReflection.GetCSTypeFromRedType(valueTypeName);
+            var propRedType = BaseReader.ReadLengthPrefixedString();
+            var propSize = _reader.ReadUInt32() - 4;
 
-            BaseReader.ReadUInt32();
+            #endregion
 
-            var propertyInfo = RedReflection.GetPropertyByRedName(type, varName);
-            IRedType value;
-
-            if (propertyInfo == null)
+            var nativeProp = typeInfo.GetNativePropertyInfoByName(propRedName);
+            if (nativeProp == null)
             {
-                value = Read(valueType, 0, Flags.Empty);
-                instance.SetProperty(varName, value);
+                // Handle dynamic props
+                throw new DoNotMergeIntoMainBeforeFixedException();
             }
-            else
-            {
-                value = Read(valueType, 0, valueFlags);
 
-                if (valueType != propertyInfo.Type)
+            var redTypeInfos = RedReflection.GetRedTypeInfos(propRedType);
+            foreach (var redTypeInfo in redTypeInfos)
+            {
+                if (redTypeInfo is SpecialRedTypeInfo)
                 {
-                    var propName = $"{RedReflection.GetRedTypeFromCSType(instance.GetType())}.{varName}";
-                    var args = new InvalidRTTIEventArgs(propName, propertyInfo.Type, valueType, value);
-                    if (HandleParsingError(args) == HandlerResult.NotHandled)
-                    {
-                        throw new InvalidRTTIException(propName, propertyInfo.Type, valueType);
-
-                    }
-                    value = args.Value;
+                    // Handle unknown rtti type
+                    throw new DoNotMergeIntoMainBeforeFixedException();
                 }
-
-                instance.SetProperty(propertyInfo.RedName, value);
             }
-        }
 
-        return instance;
+            if (nativeProp.Type != RedReflection.GetFullType(redTypeInfos))
+            {
+                // Handle type mismatch
+                throw new DoNotMergeIntoMainBeforeFixedException();
+            }
+
+            var value = Read(redTypeInfos, propSize);
+
+            if (!typeInfo.SerializeDefault && !nativeProp.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propRedName, value))
+            {
+                // Handle invalid default value
+                throw new DoNotMergeIntoMainBeforeFixedException();
+            }
+
+            cls.SetProperty(propRedName, value);
+        }
     }
 }

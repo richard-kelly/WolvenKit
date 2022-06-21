@@ -14,4 +14,6 @@ namespace WolvenKit.RED4.Types.Exceptions
         {
         }
     }
+
+    public class DoNotMergeIntoMainBeforeFixedException : Exception { }
 }

@@ -139,12 +139,12 @@ namespace WolvenKit.RED4.Archive.IO
 
             for (var i = _chunks.Count - 1; i >= 0; i--)
             {
-                if (!HandleQueue.ContainsKey(i))
+                if (!_handleQueue.ContainsKey(i))
                 {
                     continue;
                 }
 
-                foreach (var handle in HandleQueue[i])
+                foreach (var handle in _handleQueue[i])
                 {
                     handle.SetValue(_chunks[i]);
                 }
@@ -157,13 +157,13 @@ namespace WolvenKit.RED4.Archive.IO
                 var buffer = ReadBuffer(_cr2wFile.Info.BufferInfo[i]);
                 buffer.RootChunk = _cr2wFile.RootChunk;
 
-                if (!BufferQueue.ContainsKey(i))
+                if (!_bufferQueue.ContainsKey(i))
                 {
                     _logger?.Warning("Unused buffer found!");
                     continue;
                 }
 
-                foreach (var pointers in BufferQueue[i])
+                foreach (var pointers in _bufferQueue[i])
                 {
                     foreach (var parentType in pointers.GetValue().ParentTypes)
                     {
@@ -174,14 +174,14 @@ namespace WolvenKit.RED4.Archive.IO
                     pointers.SetValue(buffer);
                 }
 
-                BufferQueue.Remove(i);
+                _bufferQueue.Remove(i);
 
                 ParseBuffer(buffer);
             }
 
-            if (BufferQueue.Count > 0)
+            if (_bufferQueue.Count > 0)
             {
-                throw new TodoException($"The CR2W file is missing {BufferQueue.Count} buffer(s)");
+                throw new TodoException($"The CR2W file is missing {_bufferQueue.Count} buffer(s)");
             }
 
             foreach (var embeddedInfo in _cr2wFile.Info.EmbeddedInfo)

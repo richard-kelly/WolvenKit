@@ -1,11 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 
 namespace WolvenKit.RED4.Types
 {
+    public static class CArray
+    {
+        public static IRedArray Create(Type innerType)
+        {
+            var genericType = typeof(CArray<>);
+            var constructedType = genericType.MakeGenericType(innerType);
+
+            return (IRedArray)System.Activator.CreateInstance(constructedType);
+        }
+    }
+
     [RED("array")]
     public class CArray<T> : CArrayBase<T>, IRedArray<T> where T : IRedType
     {

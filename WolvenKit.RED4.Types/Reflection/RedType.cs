@@ -73,6 +73,10 @@ public enum SpecialRedType
 public class RedTypeInfo
 {
     public BaseRedType BaseRedType { get; set; }
+
+    public Type RedObjectType { get; set; }
+    public string RedObjectName { get; set; }
+
     public Type MappedType => GetTypeMapping();
     public int ArrayCount { get; set; }
 
@@ -80,6 +84,25 @@ public class RedTypeInfo
     {
         BaseRedType = baseRedType;
         ArrayCount = arrayCount;
+    }
+
+    public RedTypeInfo(BaseRedType baseRedType, string redObjectName)
+    {
+        BaseRedType = baseRedType;
+
+        RedObjectName = redObjectName;
+        
+        ArrayCount = -1;
+    }
+
+    public RedTypeInfo(BaseRedType baseRedType, Type redObjectType)
+    {
+        BaseRedType = baseRedType;
+
+        RedObjectType = redObjectType;
+        RedObjectName = redObjectType.Name;
+
+        ArrayCount = -1;
     }
 
     protected virtual Type GetTypeMapping()
@@ -104,6 +127,8 @@ public class RedTypeInfo
                 return typeof(CResourceReference<>);
             case BaseRedType.ResourceAsyncReference:
                 return typeof(CResourceAsyncReference<>);
+            case BaseRedType.BitField:
+                return typeof(CBitField<>);
             case BaseRedType.LegacySingleChannelCurve:
                 return typeof(CLegacySingleChannelCurve<>);
             default:
@@ -197,7 +222,7 @@ public class FundamentalRedTypeInfo : RedTypeInfo
             case FundamentalRedType.Double:
                 return typeof(CDouble);
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(FundamentalRedType.ToString());
         }
     }
 }
@@ -217,8 +242,6 @@ public class SpecialRedTypeInfo : RedTypeInfo
     {
         switch (SpecialRedType)
         {
-            case SpecialRedType.Vector4:
-                return typeof(Vector4);
             case SpecialRedType.Mixed:
                 return null;
             default:
