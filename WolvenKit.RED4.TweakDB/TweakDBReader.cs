@@ -207,9 +207,7 @@ public class TweakDBReader : Red4Reader
         }
 
         var type = RedReflection.GetFullType(redTypeInfos);
-        var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type);
-
-        result.DepotPath = BaseReader.ReadUInt64();
+        var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type, (CName)BaseReader.ReadUInt64());
 
         return result;
     }

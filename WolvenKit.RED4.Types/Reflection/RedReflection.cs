@@ -99,12 +99,6 @@ namespace WolvenKit.RED4.Types
                 result = System.Activator.CreateInstance(type);
             }
 
-            var typeInfo = GetTypeInfo(type);
-            if (typeInfo is { IsValueType: true })
-            {
-                result = System.Activator.CreateInstance(type);
-            }
-
             s_defaultValueCache.TryAdd(type, result);
 
             return result;
@@ -608,13 +602,13 @@ namespace WolvenKit.RED4.Types
             private readonly Dictionary<string, int> _nameIndex = new();
             private readonly Dictionary<string, int> _redNameIndex = new();
 
+            public Type Type { get; }
             public Type BaseType { get; }
             public bool SerializeDefault { get; }
             public int ChildLevel { get; }
 
             public bool IsDynamicType { get; }
 
-            public bool IsValueType { get; }
             public ImmutableList<ExtendedPropertyInfo> PropertyInfos { get; } = ImmutableList<ExtendedPropertyInfo>.Empty;
             public List<ExtendedPropertyInfo> DynamicPropertyInfos { get; } = new();
 
@@ -627,6 +621,7 @@ namespace WolvenKit.RED4.Types
             {
                 IsDynamicType = false;
 
+                Type = type;
                 BaseType = type.BaseType;
 
                 var attrs = type.GetCustomAttributes(false);
@@ -636,11 +631,6 @@ namespace WolvenKit.RED4.Types
                     {
                         SerializeDefault = clsAttr.SerializeDefault;
                         ChildLevel = clsAttr.ChildLevel;
-                    }
-
-                    if (attribute is REDTypeAttribute typeAttr)
-                    {
-                        IsValueType = typeAttr.IsValueType;
                     }
                 }
 

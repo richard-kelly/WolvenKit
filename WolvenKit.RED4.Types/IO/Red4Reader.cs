@@ -376,20 +376,18 @@ namespace WolvenKit.RED4.IO
                 throw new TodoException();
             }
 
-            var type = RedReflection.GetFullType(redTypeInfos);
-            var result = (IRedResourceReference)System.Activator.CreateInstance(type);
+            var depotPath = CName.Empty;
+            var flags = InternalEnums.EImportFlags.Default;
 
             var index = _reader.ReadUInt16();
             if (index > 0 && index <= importsList.Count)
             {
-                result.DepotPath = importsList[index - 1].DepotPath;
-                result.Flags = importsList[index - 1].Flags;
+                depotPath = importsList[index - 1].DepotPath;
+                flags = importsList[index - 1].Flags;
             }
-            else
-            {
-                result.DepotPath = "";
-                result.Flags = InternalEnums.EImportFlags.Default;
-            }
+
+            var type = RedReflection.GetFullType(redTypeInfos);
+            var result = (IRedResourceReference)System.Activator.CreateInstance(type, depotPath, flags);
 
             return result;
         }
@@ -401,20 +399,18 @@ namespace WolvenKit.RED4.IO
                 throw new TodoException();
             }
 
-            var type = RedReflection.GetFullType(redTypeInfos);
-            var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type);
+            var depotPath = CName.Empty;
+            var flags = InternalEnums.EImportFlags.Default;
 
             var index = _reader.ReadUInt16();
             if (index > 0 && index <= importsList.Count)
             {
-                result.DepotPath = importsList[index - 1].DepotPath;
-                result.Flags = importsList[index - 1].Flags;
+                depotPath = importsList[index - 1].DepotPath;
+                flags = importsList[index - 1].Flags;
             }
-            else
-            {
-                result.DepotPath = "";
-                result.Flags = InternalEnums.EImportFlags.Default;
-            }
+
+            var type = RedReflection.GetFullType(redTypeInfos);
+            var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type, depotPath, flags);
 
             return result;
         }

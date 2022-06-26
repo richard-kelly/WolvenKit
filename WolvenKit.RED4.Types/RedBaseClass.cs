@@ -22,8 +22,7 @@ namespace WolvenKit.RED4.Types
                     continue;
                 }
 
-                var propTypeInfo = RedReflection.GetTypeInfo(propertyInfo.Type);
-                if (propertyInfo.Type.IsValueType || propTypeInfo.IsValueType)
+                if (propertyInfo.Type.IsValueType)
                 {
                     if (propertyInfo.Flags.Equals(Flags.Empty))
                     {

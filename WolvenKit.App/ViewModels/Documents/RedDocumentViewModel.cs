@@ -330,6 +330,16 @@ namespace WolvenKit.ViewModels.Documents
             }
         }
 
+        public CR2WFile GetFileFromDepotPath(IRedRef resRef, bool original = false)
+        {
+            if (resRef != null && resRef.IsSet)
+            {
+                return GetFileFromDepotPath(resRef.DepotPath);
+            }
+
+            return null;
+        }
+
         public CR2WFile GetFileFromDepotPath(CName depotPath, bool original = false)
         {
             CR2WFile cr2wFile = null;

@@ -341,12 +341,14 @@ public class ResourceReferenceConverter : JsonConverter<IRedRef>, ICustomRedConv
             throw new JsonException();
         }
 
-        var result = (IRedRef)RedTypeManager.CreateRedType(typeToConvert);
+        var depotPath = CName.Empty;
+        var flags = InternalEnums.EImportFlags.Default;
+
         while (reader.Read())
         {
             if (reader.TokenType == JsonTokenType.EndObject)
             {
-                return result;
+                return (IRedRef)RedTypeManager.CreateRedType(typeToConvert, depotPath, flags);
             }
 
             if (reader.TokenType != JsonTokenType.PropertyName)
@@ -363,7 +365,7 @@ public class ResourceReferenceConverter : JsonConverter<IRedRef>, ICustomRedConv
                     if (converter is ICustomRedConverter conv)
                     {
                         reader.Read();
-                        result.DepotPath = (CName)conv.ReadRedType(ref reader, typeof(CName), options)!;
+                        depotPath = (CName)conv.ReadRedType(ref reader, typeof(CName), options)!;
                     }
                     else
                     {
@@ -387,7 +389,7 @@ public class ResourceReferenceConverter : JsonConverter<IRedRef>, ICustomRedConv
                         throw new JsonException();
                     }
 
-                    result.Flags = Enum.Parse<InternalEnums.EImportFlags>(str);
+                    flags = Enum.Parse<InternalEnums.EImportFlags>(str);
                     break;
                 }
 

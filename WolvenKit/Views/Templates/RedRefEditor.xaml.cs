@@ -81,7 +81,7 @@ namespace WolvenKit.Views.Editors
         {
             if (RedRef == null)
                 return;
-            CName cn = null;
+            CName cn;
             if (ulong.TryParse(value, out var number))
             {
                 cn = number;
@@ -90,8 +90,7 @@ namespace WolvenKit.Views.Editors
             {
                 cn = value;
             }
-            var redRef = (IRedRef)RedTypeManager.CreateRedType(RedRef.RedType);
-            redRef.DepotPath = cn;
+            var redRef = (IRedRef)RedTypeManager.CreateRedType(RedRef.RedType, cn);
             SetCurrentValue(RedRefProperty, redRef);
             HashBox.SetCurrentValue(TextBox.TextProperty, GetHashFromRedValue().ToString());
         }

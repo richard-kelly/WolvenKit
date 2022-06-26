@@ -43,9 +43,8 @@ namespace WolvenKit.RED4.Types
         protected CArrayBase(int size)
         {
             _internalList = new List<T>(new T[size]);
-
-            var propTypeInfo = RedReflection.GetTypeInfo(typeof(T));
-            if (propTypeInfo.IsValueType)
+            
+            if (typeof(T).IsValueType)
             {
                 for (var i = 0; i < Count; i++)
                 {

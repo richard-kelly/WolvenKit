@@ -124,11 +124,7 @@ namespace WolvenKit.RED4.CR2W
                 {
                     var orgValue = (CResourceReference<inkWidgetLibraryResource>)e1.Value;
 
-                    e1.Value = new CResourceAsyncReference<inkWidgetLibraryResource>
-                    {
-                        DepotPath = orgValue.DepotPath,
-                        Flags = orgValue.Flags
-                    };
+                    e1.Value = new CResourceAsyncReference<inkWidgetLibraryResource>(orgValue.DepotPath, orgValue.Flags);
 
                     return HandlerResult.Modified;
                 }
@@ -141,10 +137,7 @@ namespace WolvenKit.RED4.CR2W
 
                     e1.Value = new redResourceReferenceScriptToken
                     {
-                        Resource = new CResourceAsyncReference<CResource>
-                        {
-                            DepotPath = orgStr
-                        }
+                        Resource = new CResourceAsyncReference<CResource>(orgStr)
                     };
 
                     return HandlerResult.Modified;

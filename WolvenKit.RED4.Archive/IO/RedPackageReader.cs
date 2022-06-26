@@ -175,24 +175,18 @@ namespace WolvenKit.RED4.Archive.IO
                 throw new TodoException();
             }
 
+            var depotPath = CName.Empty;
+            var flags = InternalEnums.EImportFlags.Default;
+
+            var index = _reader.ReadUInt16();
+            if (index > 0 && index <= importsList.Count)
+            {
+                depotPath = importsList[index].DepotPath;
+                flags = importsList[index].Flags;
+            }
+
             var type = RedReflection.GetFullType(redTypeInfos);
-            var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type);
-
-            var index = _reader.ReadInt16();
-
-            if (index >= 0 && index < importsList.Count)
-            {
-                var import = (PackageImport)importsList[index - 0];
-
-                result.DepotPath = import.DepotPath != "" ? import.DepotPath : import.Hash;
-                result.Flags = import.Flags;
-            }
-            else
-            {
-                // TODO: Find a better way (written as -1)
-                result.DepotPath = "INVALID";
-                result.Flags = InternalEnums.EImportFlags.Default;
-            }
+            var result = (IRedResourceAsyncReference)System.Activator.CreateInstance(type, depotPath, flags);
 
             return result;
         }
@@ -204,24 +198,18 @@ namespace WolvenKit.RED4.Archive.IO
                 throw new TodoException();
             }
 
+            var depotPath = CName.Empty;
+            var flags = InternalEnums.EImportFlags.Default;
+
+            var index = _reader.ReadUInt16();
+            if (index > 0 && index <= importsList.Count)
+            {
+                depotPath = importsList[index].DepotPath;
+                flags = importsList[index].Flags;
+            }
+
             var type = RedReflection.GetFullType(redTypeInfos);
-            var result = (IRedResourceReference)System.Activator.CreateInstance(type);
-
-            var index = _reader.ReadInt16();
-
-            if (index >= 0 && index < importsList.Count)
-            {
-                var import = (PackageImport)importsList[index - 0];
-
-                result.DepotPath = import.DepotPath != "" ? import.DepotPath : import.Hash;
-                result.Flags = import.Flags;
-            }
-            else
-            {
-                // TODO: Find a better way (written as -1)
-                result.DepotPath = "INVALID";
-                result.Flags = InternalEnums.EImportFlags.Default;
-            }
+            var result = (IRedResourceReference)System.Activator.CreateInstance(type, depotPath, flags);
 
             return result;
         }

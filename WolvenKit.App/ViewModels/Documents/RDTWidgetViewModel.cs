@@ -81,7 +81,7 @@ namespace WolvenKit.ViewModels.Documents
                                                  {
                                                      inkAnimations = new();
 
-                                                     var animFile = File.GetFileFromDepotPath(library.AnimationLibraryResRef?.DepotPath ?? null);
+                                                     var animFile = File.GetFileFromDepotPath(library.AnimationLibraryResRef);
 
                                                      if (animFile != null && animFile.RootChunk is inkanimAnimationLibraryResource alr)
                                                      {
@@ -218,7 +218,7 @@ namespace WolvenKit.ViewModels.Documents
                 return;
             }
 
-            var xbmFile = File.GetFileFromDepotPath(atlas?.Slots[0]?.Texture?.DepotPath ?? null);
+            var xbmFile = File.GetFileFromDepotPath(atlas.Slots[0]?.Texture);
             if (xbmFile == null || xbmFile.RootChunk is not CBitmapTexture xbm)
             {
                 return;
