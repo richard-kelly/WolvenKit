@@ -132,6 +132,11 @@ namespace WolvenKit.RED4.IO
 
         public virtual IRedArray ReadCArray(List<RedTypeInfo> redTypeInfos, uint size, bool readAdditionalBytes = true)
         {
+            if (redTypeInfos.Count < 2)
+            {
+                throw new TodoException();
+            }
+
             var type = RedReflection.GetFullType(redTypeInfos);
             var result = (IRedArray)System.Activator.CreateInstance(type);
 
@@ -275,7 +280,7 @@ namespace WolvenKit.RED4.IO
 
         public virtual IRedStatic ReadCStaticArray(List<RedTypeInfo> redTypeInfos, uint size)
         {
-            if (redTypeInfos.Count != 2)
+            if (redTypeInfos.Count < 2)
             {
                 throw new TodoException();
             }
@@ -299,9 +304,9 @@ namespace WolvenKit.RED4.IO
 
         public virtual IRedArrayFixedSize ReadCArrayFixedSize(List<RedTypeInfo> redTypeInfos, uint size)
         {
-            if (redTypeInfos.Count != 2)
+            if (redTypeInfos.Count < 2)
             {
-                
+                throw new TodoException();
             }
 
             var type = RedReflection.GetFullType(redTypeInfos);
