@@ -60,7 +60,7 @@ namespace WolvenKit.RED4.Archive.IO
                 #region Header
 
                 var propRedName = ReadCName();
-                if (propRedName == "")
+                if (propRedName == "None")
                 {
                     break;
                 }

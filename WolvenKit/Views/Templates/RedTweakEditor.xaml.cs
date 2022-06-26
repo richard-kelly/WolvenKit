@@ -76,7 +76,7 @@ namespace WolvenKit.Views.Editors
         private string GetPathFromRedValue()
         {
             // this might need to be handled at the class level like enums
-            if (RedTweak is null)
+            if (RedTweak == TweakDBID.Empty)
             {
                 return "";
             }
@@ -87,15 +87,7 @@ namespace WolvenKit.Views.Editors
             return RedTweak.ResolvedText;
         }
 
-        private ulong GetHashFromRedValue()
-        {
-            // this might need to be handled at the class level like enums
-            if (RedTweak is null)
-            {
-                return 0;
-            }
-            return (ulong)RedTweak;
-        }
+        private ulong GetHashFromRedValue() => RedTweak;
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {

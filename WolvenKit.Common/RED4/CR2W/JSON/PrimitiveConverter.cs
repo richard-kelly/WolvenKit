@@ -363,7 +363,7 @@ public class ResourceReferenceConverter : JsonConverter<IRedRef>, ICustomRedConv
                     if (converter is ICustomRedConverter conv)
                     {
                         reader.Read();
-                        result.DepotPath = (CName?)conv.ReadRedType(ref reader, typeof(CName), options);
+                        result.DepotPath = (CName)conv.ReadRedType(ref reader, typeof(CName), options)!;
                     }
                     else
                     {

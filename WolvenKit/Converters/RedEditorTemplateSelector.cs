@@ -48,7 +48,7 @@ namespace WolvenKit.Converters
                 {
                     return RedNodeRefEditor;
                 }
-                if (vm.PropertyType.IsAssignableTo(typeof(BaseStringType)))
+                if (vm.PropertyType.IsAssignableTo(typeof(IRedString)))
                 {
                     return RedStringEditor;
                 }

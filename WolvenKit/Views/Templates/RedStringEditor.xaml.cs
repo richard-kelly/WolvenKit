@@ -30,13 +30,13 @@ namespace WolvenKit.Views.Editors
 
         }
 
-        public BaseStringType RedString
+        public IRedString RedString
         {
-            get => (BaseStringType)GetValue(RedStringProperty);
+            get => (IRedString)GetValue(RedStringProperty);
             set => SetValue(RedStringProperty, value);
         }
         public static readonly DependencyProperty RedStringProperty = DependencyProperty.Register(
-            nameof(RedString), typeof(BaseStringType), typeof(RedStringEditor), new PropertyMetadata(default(BaseStringType)));
+            nameof(RedString), typeof(IRedString), typeof(RedStringEditor), new PropertyMetadata(default(IRedString)));
 
 
         public string Text
@@ -71,7 +71,7 @@ namespace WolvenKit.Views.Editors
             {
                 return "";
             }
-            var redvalue = (string)RedString;
+            var redvalue = RedString.ToString();
             if (redvalue is string redstring)
             {
                 return redstring;

@@ -266,13 +266,7 @@ namespace WolvenKit.RED4.IO
                 throw new TodoException();
             }
 
-            var enumString = "None";
-
-            var index = _reader.ReadUInt16();
-            if (index != 0)
-            {
-                enumString = GetStringValue(index);
-            }
+            var enumString = GetStringValue(_reader.ReadUInt16());
 
             var type = RedReflection.GetFullType(redTypeInfos);
             return (IRedEnum)System.Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { Enum.Parse(redTypeInfos[0].RedObjectType, enumString) }, null);

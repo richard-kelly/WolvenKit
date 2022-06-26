@@ -668,7 +668,12 @@ namespace WolvenKit.RED4.Archive.IO
             foreach (var str in strings)
             {
                 offsetDict.Add(str, (uint)bytes.Count);
-                bytes.AddRange(encoding.GetBytes(str));
+
+                if (str != CName.Empty)
+                {
+                    bytes.AddRange(encoding.GetBytes(str));
+                }
+
                 bytes.Add(0);
             }
             return (bytes.ToArray(), offsetDict);

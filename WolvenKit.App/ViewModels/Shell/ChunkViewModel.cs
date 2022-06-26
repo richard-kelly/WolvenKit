@@ -322,9 +322,9 @@ namespace WolvenKit.ViewModels.Shell
                 //    Properties.Add(new ChunkViewModel(record, this, "record"));
                 //}
             }
-            else if (obj is BaseStringType str)
+            else if (obj is IRedString str)
             {
-                var s = (string)str;
+                var s = str.ToString();
                 if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var locKey))
                 {
                     obj = Locator.Current.GetService<LocKeyService>().GetEntry(locKey);
@@ -740,9 +740,9 @@ namespace WolvenKit.ViewModels.Shell
                         return type;
                     }
                 }
-                if (Data is BaseStringType str)
+                if (Data is IRedString str)
                 {
-                    var s = (string)str;
+                    var s = str.ToString();
                     if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var _))
                     {
                         return typeof(localizationPersistenceOnScreenEntry);
@@ -826,9 +826,9 @@ namespace WolvenKit.ViewModels.Shell
                             count += 1;
                         }
                     }
-                    else if (ResolvedData is BaseStringType str)
+                    else if (ResolvedData is IRedString str)
                     {
-                        var s = (string)str;
+                        var s = str.ToString();
                         if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var locKey))
                         {
                             // not actual
@@ -1000,9 +1000,9 @@ namespace WolvenKit.ViewModels.Shell
                 Value = "null";
             }
 
-            if (PropertyType.IsAssignableTo(typeof(BaseStringType)))
+            if (PropertyType.IsAssignableTo(typeof(IRedString)))
             {
-                var value = (BaseStringType)Data;
+                var value = (IRedString)Data;
                 if (value is NodeRef rn)
                 {
                     if (rn.GetResolvedText() is var text && !string.IsNullOrEmpty(text))
@@ -1018,9 +1018,9 @@ namespace WolvenKit.ViewModels.Shell
                 {
                     Value = "null";
                 }
-                if (!string.IsNullOrEmpty(value))
+                if (!string.IsNullOrEmpty(value.ToString()))
                 {
-                    Value = value;
+                    Value = value.ToString();
                     if (Value is not null && Value.StartsWith("LocKey#") && ulong.TryParse(Value[7..], out var key))
                     {
                         Value = "";
@@ -1149,9 +1149,9 @@ namespace WolvenKit.ViewModels.Shell
                 Descriptor = ((ulong)locKey).ToString();
                 //Value = Locator.Current.GetService<LocKeyService>().GetFemaleVariant(value);
             }
-            else if (Data is BaseStringType str)
+            else if (Data is IRedString str)
             {
-                var s = (string)str;
+                var s = str.ToString();
                 if (s is not null && s.StartsWith("LocKey#") && ulong.TryParse(s[7..], out var locKey2))
                 {
                     Descriptor = locKey2.ToString();
@@ -1283,7 +1283,7 @@ namespace WolvenKit.ViewModels.Shell
                 {
                     return "SymbolNumeric";
                 }
-                if (PropertyType.IsAssignableTo(typeof(BaseStringType)))
+                if (PropertyType.IsAssignableTo(typeof(IRedString)))
                 {
                     return "SymbolString";
                 }
@@ -1348,7 +1348,7 @@ namespace WolvenKit.ViewModels.Shell
         public bool CanBeDroppedOn(ChunkViewModel target) => PropertyType == target.PropertyType;
 
         public ICommand OpenRefCommand { get; private set; }
-        private bool CanOpenRef() => Data is IRedRef r && r.DepotPath is not null;
+        private bool CanOpenRef() => Data is IRedRef r && r.DepotPath != CName.Empty;
         private void ExecuteOpenRef()
         {
             if (Data is IRedRef r)
@@ -1369,7 +1369,7 @@ namespace WolvenKit.ViewModels.Shell
         }
 
         public ICommand AddRefCommand { get; private set; }
-        private bool CanAddRef() => Data is IRedRef r && r.DepotPath is not null;
+        private bool CanAddRef() => Data is IRedRef r && r.DepotPath != CName.Empty;
         private void ExecuteAddRef()
         {
             if (Data is IRedRef r)

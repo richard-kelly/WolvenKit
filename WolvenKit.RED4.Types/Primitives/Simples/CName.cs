@@ -1,28 +1,20 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text;
-using WolvenKit.Common.FNV1A;
 
 namespace WolvenKit.RED4.Types
 {
     [RED("CName")]
-    [REDType(IsValueType = true)]
-    [DebuggerDisplay("{_value}", Type = "CName")]
-    public sealed class CName : BaseStringType, IEquatable<CName>
+    [DebuggerDisplay("{GetResolvedText()}", Type = "CName")]
+    public readonly struct CName : IRedString, IRedPrimitive<string>, IEquatable<CName>, IComparable<CName>, IComparable
     {
-        private static readonly ConcurrentDictionary<string, ulong> s_cNameCache = new();
-
-        public delegate string ResolveHash(ulong hash);
-        public static ResolveHash ResolveHashHandler;
+        public static CName Empty = new("None");
 
         private readonly ulong _hash;
 
-        public CName() { }
 
-        private CName(string value) : base(value)
+        private CName(string value)
         {
-            _hash = CalculateHash();
+            _hash = CNamePool.AddOrGetHash(value);
         }
 
         private CName(ulong value)
@@ -30,21 +22,10 @@ namespace WolvenKit.RED4.Types
             _hash = value;
         }
 
-        public string GetResolvedText() => !string.IsNullOrEmpty(_value) ? _value : ResolveHashHandler?.Invoke(_hash);
-        private ulong CalculateHash()
-        {
-            if (string.IsNullOrEmpty(_value))
-            {
-                return 0;
-            }
+        public int Length => GetResolvedText()?.Length ?? -1;
 
-            if (!s_cNameCache.ContainsKey(_value))
-            {
-                s_cNameCache.TryAdd(_value, FNV1A64HashAlgorithm.HashString(_value, Encoding.UTF8, false, true));
-            }
-
-            return s_cNameCache[_value];
-        }
+        public string GetResolvedText() => CNamePool.ResolveHash(_hash);
+        public bool IsResolvable => CNamePool.ResolveHash(_hash) != null;
 
         public ulong GetRedHash() => _hash;
         public uint GetShortRedHash() => (uint)((_hash >> 32) ^ (uint)_hash);
@@ -53,13 +34,42 @@ namespace WolvenKit.RED4.Types
         public uint GetOldRedHash() => (uint)(_hash & 0xFFFFFFFF);
 
         public static implicit operator CName(string value) => new(value);
-        public static implicit operator string(CName value) => value?._value; 
+        public static implicit operator string(CName value) => value.GetResolvedText();
 
         public static implicit operator CName(ulong value) => new(value);
-        public static implicit operator ulong(CName value) => value?._hash ?? 0;
+        public static implicit operator ulong(CName value) => value._hash;
 
         public static bool operator ==(CName a, CName b) => Equals(a, b);
         public static bool operator !=(CName a, CName b) => !(a == b);
+
+
+        public int CompareTo(object value)
+        {
+            if (value == null)
+            {
+                return 1;
+            }
+
+            if (value is not CName other)
+            {
+                throw new ArgumentException();
+            }
+
+            return CompareTo(other);
+        }
+
+        public int CompareTo(CName other)
+        {
+            var strA = GetResolvedText();
+            var strB = GetResolvedText();
+
+            if (strA != null && strB != null)
+            {
+                return string.Compare(strA, strB, StringComparison.InvariantCulture);
+            }
+
+            return _hash.CompareTo(other._hash);
+        }
 
         public override int GetHashCode() => _hash.GetHashCode();
 
@@ -68,11 +78,6 @@ namespace WolvenKit.RED4.Types
             if (ReferenceEquals(null, obj))
             {
                 return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
             }
 
             if (obj.GetType() != this.GetType())
@@ -85,7 +90,7 @@ namespace WolvenKit.RED4.Types
 
         public bool Equals(CName other)
         {
-            if (!Equals(GetRedHash(), other?.GetRedHash()))
+            if (!Equals(GetRedHash(), other.GetRedHash()))
             {
                 return false;
             }

@@ -374,7 +374,14 @@ namespace WolvenKit.RED4.Archive.IO
             var result = new Dictionary<uint, CName>();
             while (BaseStream.Position < (stringInfoTable.offset + stringInfoTable.itemCount))
             {
-                result.Add((uint)BaseStream.Position - stringInfoTable.offset, _reader.ReadNullTerminatedString());
+                var pos = (uint)BaseStream.Position - stringInfoTable.offset;
+                var val = _reader.ReadNullTerminatedString();
+                if (val == "")
+                {
+                    val = "None";
+                }
+
+                result.Add(pos, val);
             }
 
             return result;

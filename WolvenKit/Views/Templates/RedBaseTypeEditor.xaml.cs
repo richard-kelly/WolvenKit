@@ -51,16 +51,16 @@ namespace WolvenKit.Views.Editors
             {
                 return "null";
             }
-            else if (PropertyType.IsAssignableTo(typeof(BaseStringType)))
+            else if (PropertyType.IsAssignableTo(typeof(IRedString)))
             {
-                var value = (BaseStringType)RedType;
-                if (string.Equals(value, ""))
+                var value = (IRedString)RedType;
+                if (string.Equals(value.ToString(), ""))
                 {
                     return "null";
                 }
                 else
                 {
-                    return value;
+                    return value.ToString();
                 }
             }
             else if (PropertyType.IsAssignableTo(typeof(IRedArray)))

@@ -36,8 +36,8 @@ namespace WolvenKit.Common.Services
         public HashService()
         {
             Load();
-            CName.ResolveHashHandler = Get;
-            NodeRef.ResolveHashHandler = GetNodeRef;
+            CNamePool.ResolveHashHandler = Get;
+            NodeRefPool.ResolveHashHandler = GetNodeRef;
         }
 
         #endregion Constructors
