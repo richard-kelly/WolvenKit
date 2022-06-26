@@ -371,7 +371,7 @@ namespace WolvenKit.RED4.Archive.IO
             }
 
             file.GenerateStringDictionary();
-            file.StringCacheList.Remove("");
+            file.StringCacheList.Remove("None");
 
             for (var i = 0; i < chunkDesc.Count; i++)
             {

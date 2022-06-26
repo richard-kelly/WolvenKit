@@ -37,7 +37,7 @@ namespace WolvenKit.RED4.Archive.IO
                 var value = cls.GetProperty(propertyInfo.RedName);
                 if (!propertyInfo.IsDynamic)
                 {
-                    if (!typeInfo.SerializeDefault && !propertyInfo.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propertyInfo, value))
+                    if (!typeInfo.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propertyInfo, value))
                     {
                         continue;
                     }

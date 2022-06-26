@@ -44,7 +44,20 @@ namespace WolvenKit.RED4.Types
 
         public bool Remove(T item)
         {
-            return _valueList.Remove(item) && _keyValueList.Remove(item);
+            var result = _valueList.Remove(item);
+
+            if (result)
+            {
+                var valList = _valueList.ToList();
+
+                _keyValueList.Clear();
+                for (_index = 0; _index < _valueList.Count; _index++)
+                {
+                    _keyValueList.Add(valList[_index], _index);
+                }
+            }
+            
+            return result;
         }
 
         public ushort IndexOf(T value)

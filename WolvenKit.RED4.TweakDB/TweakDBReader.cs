@@ -266,7 +266,7 @@ public class TweakDBReader : Red4Reader
 
             var value = Read(redTypeInfos, propSize);
 
-            if (!typeInfo.SerializeDefault && !nativeProp.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propRedName, value))
+            if (!typeInfo.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propRedName, value))
             {
                 // Handle invalid default value
                 throw new DoNotMergeIntoMainBeforeFixedException();

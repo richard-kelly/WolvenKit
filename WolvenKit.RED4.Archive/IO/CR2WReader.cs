@@ -95,7 +95,7 @@ namespace WolvenKit.RED4.Archive.IO
 
                 var value = Read(redTypeInfos, propSize);
 
-                if (!typeInfo.SerializeDefault && !nativeProp.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propRedName, value))
+                if (!typeInfo.SerializeDefault && RedReflection.IsDefault(cls.GetType(), nativeProp, value))
                 {
                     // Handle invalid default value
                     throw new DoNotMergeIntoMainBeforeFixedException();

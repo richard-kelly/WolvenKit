@@ -843,8 +843,7 @@ namespace WolvenKit.RED4.Types
 
             public Type Type { get; }
             public Type GenericType { get; }
-
-            public bool SerializeDefault { get; private set; }
+            
             public object DefaultValue { get; internal set; }
 
             public ExtendedPropertyInfo(string name, string type)
@@ -909,7 +908,6 @@ namespace WolvenKit.RED4.Types
 
                 if (attribute is REDPropertyAttribute redPropertyAttribute)
                 {
-                    SerializeDefault = redPropertyAttribute.SerializeDefault;
                     IsIgnored = redPropertyAttribute.IsIgnored;
                 }
             }

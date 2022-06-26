@@ -168,7 +168,7 @@ public class PersistencySystem2Writer : Red4Writer
         foreach (var propertyInfo in typeInfo.GetWritableProperties())
         {
             var value = instance.GetProperty(propertyInfo.RedName);
-            if (!typeInfo.SerializeDefault && !propertyInfo.SerializeDefault && RedReflection.IsDefault(instance.GetType(), propertyInfo, value))
+            if (!typeInfo.SerializeDefault && RedReflection.IsDefault(instance.GetType(), propertyInfo, value))
             {
                 continue;
             }

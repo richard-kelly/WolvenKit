@@ -63,7 +63,7 @@ namespace WolvenKit.RED4.Archive.IO
 
                 var value = Read(redTypeInfos);
 
-                if (!typeInfo.SerializeDefault && !nativeProp.SerializeDefault && RedReflection.IsDefault(cls.GetType(), propRedName, value))
+                if (!typeInfo.SerializeDefault && RedReflection.IsDefault(cls.GetType(), nativeProp, value))
                 {
                     // Handle invalid default value
                     throw new DoNotMergeIntoMainBeforeFixedException();
@@ -178,8 +178,8 @@ namespace WolvenKit.RED4.Archive.IO
             var depotPath = CName.Empty;
             var flags = InternalEnums.EImportFlags.Default;
 
-            var index = _reader.ReadUInt16();
-            if (index > 0 && index <= importsList.Count)
+            var index = _reader.ReadInt16();
+            if (index >= 0 && index < importsList.Count)
             {
                 depotPath = importsList[index].DepotPath;
                 flags = importsList[index].Flags;
@@ -201,8 +201,8 @@ namespace WolvenKit.RED4.Archive.IO
             var depotPath = CName.Empty;
             var flags = InternalEnums.EImportFlags.Default;
 
-            var index = _reader.ReadUInt16();
-            if (index > 0 && index <= importsList.Count)
+            var index = _reader.ReadInt16();
+            if (index >= 0 && index < importsList.Count)
             {
                 depotPath = importsList[index].DepotPath;
                 flags = importsList[index].Flags;
