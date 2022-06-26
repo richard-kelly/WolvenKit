@@ -1,4 +1,4 @@
-#define IS_PARALLEL
+//#define IS_PARALLEL
 
 using System;
 using System.Collections.Concurrent;
@@ -25,6 +25,7 @@ namespace WolvenKit.FunctionalTests
         [ClassInitialize]
         public static void SetupClass(TestContext context) => Setup(context);
 
+        private const bool TEST_EXISTING = false;
         private const bool DECOMPRESS_BUFFERS = false;
 
         #endregion Methods
@@ -544,18 +545,41 @@ namespace WolvenKit.FunctionalTests
 
         private static void Test_Extension(string extension)
         {
+            ArgumentNullException.ThrowIfNull(s_bm);
             var resultDir = Path.Combine(Environment.CurrentDirectory, s_testResultsDirectory);
             Directory.CreateDirectory(resultDir);
 
             // Run Test
-            var results = Read_Archive_Items(s_groupedFiles[extension]).ToList();
+            List<FileEntry> filesToTest = new();
+            var resultPath = Path.Combine(resultDir, $"{extension[1..]}.csv");
+            if (File.Exists(resultPath) && TEST_EXISTING)
+            {
+                foreach (var line in File.ReadAllLines(resultPath)
+                             .Skip(1)
+                             .Where(_ => !string.IsNullOrEmpty(_)))
+                {
+                    if (ulong.TryParse(line.Split(',').First(), out var hash))
+                    {
+                        if (s_bm.Lookup(hash).Value is FileEntry entry)
+                        {
+                            filesToTest.Add(entry);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                filesToTest = s_groupedFiles[extension].ToList();
+            }
+
+            var results = Read_Archive_Items(filesToTest).ToList();
 
             // Write
             if (s_writeToFile)
             {
                 if (results.Any(r => !r.Success))
                 {
-                    var resultPath = Path.Combine(resultDir, $"{extension[1..]}.csv");
+                    
                     var csv = TestResultAsCsv(results.Where(r => !r.Success));
                     File.WriteAllText(resultPath, csv);
                     Console.Write(csv);
@@ -626,7 +650,7 @@ namespace WolvenKit.FunctionalTests
             foreach (var r in results)
             {
                 sb.AppendLine(
-                    $"{string.Format("0x{0:X}", r.FileEntry?.NameHash64)}," +
+                    $"{r.FileEntry?.NameHash64}," +
                     $"{r.FileEntry?.FileName}," +
                     $"{r.FileEntry?.Archive.Name}," +
                     $"{r.ReadResult}," +

@@ -266,7 +266,8 @@ namespace WolvenKit.RED4.IO
                 throw new TodoException();
             }
 
-            var enumString = GetStringValue(_reader.ReadUInt16());
+            var enumInfo = RedReflection.GetEnumTypeInfo(redTypeInfos[0].RedObjectType);
+            var enumString = enumInfo.GetCSNameFromRedName(GetStringValue(_reader.ReadUInt16()));
 
             var type = RedReflection.GetFullType(redTypeInfos);
             return (IRedEnum)System.Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { Enum.Parse(redTypeInfos[0].RedObjectType, enumString) }, null);
@@ -422,6 +423,8 @@ namespace WolvenKit.RED4.IO
                 throw new TodoException();
             }
 
+            var enumInfo = RedReflection.GetEnumTypeInfo(redTypeInfos[0].RedObjectType);
+
             var enumString = "";
             while (true)
             {
@@ -436,7 +439,7 @@ namespace WolvenKit.RED4.IO
                     enumString += ", ";
                 }
 
-                enumString += GetStringValue(index);
+                enumString += enumInfo.GetCSNameFromRedName(GetStringValue(index));
             }
 
             var type = RedReflection.GetFullType(redTypeInfos);

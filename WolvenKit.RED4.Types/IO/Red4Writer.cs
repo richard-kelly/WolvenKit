@@ -481,10 +481,13 @@ namespace WolvenKit.RED4.IO
                 return;
             }
 
+            var enumInfo = RedReflection.GetEnumTypeInfo(instance.GetInnerType());
+
             var flags = enumString.Split(',');
             for (int i = 0; i < flags.Length; i++)
             {
-                var tFlag = flags[i].Trim();
+                var tFlag = enumInfo.GetRedNameFromCSName(flags[i].Trim());
+
                 CNameRef.Add(_writer.BaseStream.Position, tFlag);
                 _writer.Write(GetStringIndex(tFlag));
             }
