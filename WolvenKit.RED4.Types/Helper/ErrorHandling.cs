@@ -37,7 +37,7 @@ public class InvalidDefaultValueEventArgs : ParsingErrorEventArgs
 
 public class UnknownRTTIEventArgs : ParsingErrorEventArgs
 {
-    public RedTypeInfo RedTypeInfo { get; }
+    public RedTypeInfo RedTypeInfo { get; set; }
 
     public UnknownRTTIEventArgs(RedTypeInfo redTypeInfo)
     {
@@ -47,10 +47,22 @@ public class UnknownRTTIEventArgs : ParsingErrorEventArgs
 
 public class UnknownPropertyEventArgs : ParsingErrorEventArgs
 {
-    public string PropertyName { get; set; }
+    public string PropertyName { get; }
 
     public UnknownPropertyEventArgs(string propertyName)
     {
         PropertyName = propertyName;
+    }
+}
+
+public class UnknownEnumValueEventArgs : ParsingErrorEventArgs
+{
+    public Type EnumType { get; }
+    public string EnumValue { get; set; }
+
+    public UnknownEnumValueEventArgs(Type enumType, string enumValue)
+    {
+        EnumType = enumType;
+        EnumValue = enumValue;
     }
 }

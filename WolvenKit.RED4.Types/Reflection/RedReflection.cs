@@ -577,6 +577,10 @@ namespace WolvenKit.RED4.Types
                     {
                         RedNames.Add(redAttr.Name, valueName);
                     }
+                    else
+                    {
+                        RedNames.Add(valueName, valueName);
+                    }
                 }
             }
 
@@ -587,7 +591,7 @@ namespace WolvenKit.RED4.Types
                     return RedNames[valueName];
                 }
 
-                return valueName;
+                return null;
             }
 
             public string GetRedNameFromCSName(string valueName)

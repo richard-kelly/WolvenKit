@@ -9,6 +9,7 @@ using System.Text;
 using WolvenKit.Core.Extensions;
 using WolvenKit.RED4.Types;
 using WolvenKit.RED4.Types.Exceptions;
+using Activator = System.Activator;
 
 namespace WolvenKit.RED4.IO
 {
@@ -271,11 +272,30 @@ namespace WolvenKit.RED4.IO
                 throw new TodoException();
             }
 
+            var value = GetStringValue(_reader.ReadUInt16());
+
             var enumInfo = RedReflection.GetEnumTypeInfo(redTypeInfos[0].RedObjectType);
-            var enumString = enumInfo.GetCSNameFromRedName(GetStringValue(_reader.ReadUInt16()));
+            var enumString = enumInfo.GetCSNameFromRedName(value);
 
             var type = RedReflection.GetFullType(redTypeInfos);
-            return (IRedEnum)System.Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { Enum.Parse(redTypeInfos[0].RedObjectType, enumString) }, null);
+            if (enumString == null)
+            {
+                var args = new UnknownEnumValueEventArgs(redTypeInfos[0].RedObjectType, value);
+                var handlingResult = HandleParsingError(args);
+
+                if (handlingResult == HandlerResult.Skip)
+                {
+                    return (IRedEnum)Activator.CreateInstance(type);
+                }
+
+                if (handlingResult == HandlerResult.NotHandled)
+                {
+                    // Handle unknown enum valaue
+                    throw new DoNotMergeIntoMainBeforeFixedException();
+                }
+            }
+
+            return (IRedEnum)Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { Enum.Parse(redTypeInfos[0].RedObjectType, enumString) }, null);
         }
 
         public virtual IRedStatic ReadCStaticArray(List<RedTypeInfo> redTypeInfos, uint size)

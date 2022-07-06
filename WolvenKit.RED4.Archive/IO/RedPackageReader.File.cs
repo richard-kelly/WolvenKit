@@ -108,7 +108,17 @@ namespace WolvenKit.RED4.Archive.IO
 
             for (var i = 0; i < chunkDesc.Length; i++)
             {
-                chunks.Add(ReadChunk(chunkDesc[i]));
+                uint size;
+                if (i < chunkDesc.Length - 1)
+                {
+                    size = chunkDesc[i + 1].offset - chunkDesc[i].offset;
+                }
+                else
+                {
+                    size = (uint)(BaseStream.Length - baseOff - chunkDesc[i].offset);
+                }
+
+                chunks.Add(ReadChunk(chunkDesc[i], size));
             }
 
             var newChunks = new List<RedBaseClass>();
@@ -178,7 +188,7 @@ namespace WolvenKit.RED4.Archive.IO
             return s;
         }
 
-        protected virtual RedBaseClass ReadChunk(RedPackageChunkHeader c)
+        protected virtual RedBaseClass ReadChunk(RedPackageChunkHeader c, uint size)
         {
             // needs header offset
             //Debug.Assert(BaseStream.Position == c.offset);
@@ -191,7 +201,7 @@ namespace WolvenKit.RED4.Archive.IO
                 dbc.ClassName = redTypeName;
             }
 
-            ReadClass(instance, 0);
+            ReadClass(instance, size);
 
             return instance;
         }

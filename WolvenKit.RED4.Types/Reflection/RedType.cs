@@ -242,6 +242,8 @@ public class SpecialRedTypeInfo : RedTypeInfo
     {
         switch (SpecialRedType)
         {
+            case SpecialRedType.MultiChannelCurve:
+                return typeof(MultiChannelCurve<>);
             case SpecialRedType.Mixed:
                 return null;
             default:

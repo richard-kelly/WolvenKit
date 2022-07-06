@@ -25,14 +25,24 @@ namespace WolvenKit.RED4.Archive.IO
 
         public override void ReadClass(RedBaseClass cls, uint size)
         {
-            var typeInfo = RedReflection.GetTypeInfo(cls);
-
             var baseOff = BaseStream.Position;
             var fieldCount = _reader.ReadUInt16();
             var fields = BaseStream.ReadStructs<RedPackageFieldHeader>(fieldCount);
 
-            foreach (var f in fields)
+            for (var i = 0; i < fields.Length; i++)
             {
+                var f = fields[i];
+
+                uint fieldSize = 0;
+                if (i < fields.Length - 1)
+                {
+                    fieldSize = fields[i + 1].offset - fields[i].offset;
+                }
+                else if (size != 0)
+                {
+                    fieldSize = size - fields[i].offset;
+                }
+
                 var propRedName = GetStringValue(f.nameID);
                 var propRedType = GetStringValue(f.typeID);
 
@@ -47,11 +57,19 @@ namespace WolvenKit.RED4.Archive.IO
                 }
 
                 var redTypeInfos = RedReflection.GetRedTypeInfos(propRedType);
-                foreach (var redTypeInfo in redTypeInfos)
+                for (var j = 0; j < redTypeInfos.Count; j++)
                 {
-                    if (redTypeInfo is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed })
+                    if (redTypeInfos[j] is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed })
                     {
-                        if (HandleParsingError(new UnknownRTTIEventArgs(redTypeInfo)) != HandlerResult.Ignore)
+                        var args = new UnknownRTTIEventArgs(redTypeInfos[j]);
+                        var handlingResult = HandleParsingError(args);
+
+                        if (handlingResult == HandlerResult.Modified)
+                        {
+                            redTypeInfos[j] = args.RedTypeInfo;
+                        }
+
+                        if (handlingResult == HandlerResult.NotHandled)
                         {
                             // Handle unknown rtti type
                             throw new DoNotMergeIntoMainBeforeFixedException();
@@ -61,9 +79,18 @@ namespace WolvenKit.RED4.Archive.IO
 
                 BaseStream.Position = baseOff + f.offset;
 
-                var value = Read(redTypeInfos);
-
                 var fullType = RedReflection.GetFullType(redTypeInfos);
+
+                IRedType value;
+                if (size == 0 || f.offset < size)
+                {
+                    value = Read(redTypeInfos, fieldSize);
+                }
+                else
+                {
+                    value = (IRedType)System.Activator.CreateInstance(fullType);
+                }
+
                 if (nativeProp.Type != fullType)
                 {
                     var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{propRedName}";
