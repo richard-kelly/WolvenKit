@@ -44,3 +44,13 @@ public class UnknownRTTIEventArgs : ParsingErrorEventArgs
         RedTypeInfo = redTypeInfo;
     }
 }
+
+public class UnknownPropertyEventArgs : ParsingErrorEventArgs
+{
+    public string PropertyName { get; set; }
+
+    public UnknownPropertyEventArgs(string propertyName)
+    {
+        PropertyName = propertyName;
+    }
+}

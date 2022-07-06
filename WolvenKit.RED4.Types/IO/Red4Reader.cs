@@ -498,6 +498,26 @@ namespace WolvenKit.RED4.IO
 
         public virtual IRedType ReadFixedArray(List<RedTypeInfo> redTypeInfos, uint size) => throw new NotImplementedException();
 
+        #region Special
+
+        public virtual IRedMultiChannelCurve ReadMultiChannelCurve(List<RedTypeInfo> redTypeInfos, uint size)
+        {
+            var type = RedReflection.GetFullType(redTypeInfos);
+            var result = (IRedMultiChannelCurve)System.Activator.CreateInstance(type);
+
+            result.NumChannels = _reader.ReadUInt32();
+            result.InterpolationType = (Enums.EInterpolationType)_reader.ReadByte();
+            result.LinkType = (Enums.EChannelLinkType)_reader.ReadByte();
+            result.Alignment = _reader.ReadUInt32();
+
+            var innerSize = _reader.ReadInt32();
+            result.Data = _reader.ReadBytes(innerSize);
+
+            return result;
+        }
+
+        #endregion Special
+
         #endregion RTTI Reader
 
         #region Helper
@@ -657,6 +677,18 @@ namespace WolvenKit.RED4.IO
                     return ReadScriptReference(redTypeInfos, size);
                 case BaseRedType.FixedArray:
                     return ReadFixedArray(redTypeInfos, size);
+
+                case BaseRedType.Special:
+                {
+                    switch (((SpecialRedTypeInfo)redTypeInfos[0]).SpecialRedType)
+                    {
+                        case SpecialRedType.MultiChannelCurve:
+                            return ReadMultiChannelCurve(redTypeInfos, size);
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }

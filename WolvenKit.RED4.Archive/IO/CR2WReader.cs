@@ -73,33 +73,56 @@ namespace WolvenKit.RED4.Archive.IO
                 var nativeProp = RedReflection.GetNativePropertyInfo(cls.GetType(), propRedName);
                 if (nativeProp == null)
                 {
-                    // Handle dynamic props
-                    throw new DoNotMergeIntoMainBeforeFixedException();
+                    if (HandleParsingError(new UnknownPropertyEventArgs(propRedName)) != HandlerResult.Ignore)
+                    {
+                        // Handle dynamic props
+                        throw new DoNotMergeIntoMainBeforeFixedException();
+                    }
                 }
 
                 var redTypeInfos = RedReflection.GetRedTypeInfos(propRedType);
                 foreach (var redTypeInfo in redTypeInfos)
                 {
-                    if (redTypeInfo is SpecialRedTypeInfo)
+                    if (redTypeInfo is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed })
                     {
-                        // Handle unknown rtti type
-                        throw new DoNotMergeIntoMainBeforeFixedException();
+                        if (HandleParsingError(new UnknownRTTIEventArgs(redTypeInfo)) != HandlerResult.Ignore)
+                        {
+                            // Handle unknown rtti type
+                            throw new DoNotMergeIntoMainBeforeFixedException();
+                        }
                     }
-                }
-
-                if (nativeProp.Type != RedReflection.GetFullType(redTypeInfos))
-                {
-                    // Handle type mismatch
-                    throw new DoNotMergeIntoMainBeforeFixedException();
                 }
 
                 var value = Read(redTypeInfos, propSize);
 
-                if (!typeInfo.SerializeDefault && RedReflection.IsDefault(cls.GetType(), nativeProp, value))
+                var fullType = RedReflection.GetFullType(redTypeInfos);
+                if (nativeProp.Type != fullType)
                 {
-                    // Handle invalid default value
-                    throw new DoNotMergeIntoMainBeforeFixedException();
+                    var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{propRedName}";
+
+                    var handleArgs = new InvalidRTTIEventArgs(propName, nativeProp.Type, fullType, value);
+                    var handleResult = HandleParsingError(handleArgs);
+
+                    if (handleResult == HandlerResult.Modified)
+                    {
+                        value = handleArgs.Value;
+                    }
+
+                    if (handleResult == HandlerResult.NotHandled)
+                    {
+                        // Handle type mismatch
+                        throw new DoNotMergeIntoMainBeforeFixedException();
+                    }
                 }
+
+                //if (!typeInfo.SerializeDefault && RedReflection.IsDefault(cls.GetType(), nativeProp, value))
+                //{
+                //    if (HandleParsingError(new InvalidDefaultValueEventArgs()) != HandlerResult.Ignore)
+                //    {
+                //        // Handle invalid default value
+                //        throw new DoNotMergeIntoMainBeforeFixedException();
+                //    }
+                //}
 
                 #region Post processing
 

@@ -303,6 +303,10 @@ namespace WolvenKit.RED4.Types
                         result.Add(new FundamentalRedTypeInfo(Enum.Parse<FundamentalRedType>(str)));
                         break;
 
+                    case "multiChannelCurve":
+                        result.Add(new SpecialRedTypeInfo(SpecialRedType.MultiChannelCurve, str));
+                        break;
+
                     default:
                         if (_redTypeCache.TryGetValue(str, out var type1) && type1.IsAssignableTo(typeof(RedBaseClass)))
                         {

@@ -63,7 +63,7 @@ public enum FundamentalRedType
 
 public enum SpecialRedType
 {
-    Vector4,
+    MultiChannelCurve,
 
     // enum/bitfield/class
     Mixed
