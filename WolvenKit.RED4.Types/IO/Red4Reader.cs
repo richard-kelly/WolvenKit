@@ -119,6 +119,29 @@ namespace WolvenKit.RED4.IO
 
         #endregion Fundamentals
 
+        public virtual RedBaseClass ReadClass(List<RedTypeInfo> redTypeInfos, uint size)
+        {
+            if (redTypeInfos.Count != 1)
+            {
+                throw new TodoException();
+            }
+
+            var type = redTypeInfos[0].RedObjectType;
+            if (!typeof(RedBaseClass).IsAssignableFrom(type))
+            {
+                throw new ArgumentException(nameof(type));
+            }
+
+            var instance = RedTypeManager.Create(type);
+            if (instance is IDynamicClass dc)
+            {
+                dc.ClassName = redTypeInfos[0].RedObjectName;
+            }
+
+            ReadClass(instance, size);
+            return instance;
+        }
+
         public virtual RedBaseClass ReadClass(Type type, uint size)
         {
             if (!typeof(RedBaseClass).IsAssignableFrom(type))
@@ -630,7 +653,7 @@ namespace WolvenKit.RED4.IO
                             throw new ArgumentOutOfRangeException();
                     }
                 case BaseRedType.Class:
-                    return ReadClass(redTypeInfos[0].RedObjectType, size);
+                    return ReadClass(redTypeInfos, size);
                 case BaseRedType.Array:
                     return ReadCArray(redTypeInfos, size);
                 case BaseRedType.Simple:

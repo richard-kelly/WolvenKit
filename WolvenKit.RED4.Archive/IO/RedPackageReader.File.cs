@@ -4,6 +4,7 @@ using System.Text;
 using WolvenKit.Core.Extensions;
 using WolvenKit.RED4.Archive.Buffer;
 using WolvenKit.RED4.Types;
+using WolvenKit.RED4.Types.Exceptions;
 
 namespace WolvenKit.RED4.Archive.IO
 {
@@ -193,12 +194,34 @@ namespace WolvenKit.RED4.Archive.IO
             // needs header offset
             //Debug.Assert(BaseStream.Position == c.offset);
             var redTypeName = GetStringValue((ushort)c.typeID);
-            var (type, _) = RedReflection.GetCSTypeFromRedType(redTypeName);
 
-            var instance = RedTypeManager.Create(type);
-            if (instance is DynamicBaseClass dbc)
+            var redTypeInfos = RedReflection.GetRedTypeInfos(redTypeName);
+            for (var j = 0; j < redTypeInfos.Count; j++)
             {
-                dbc.ClassName = redTypeName;
+                if (redTypeInfos[j] is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed })
+                {
+                    var args = new UnknownRTTIEventArgs(redTypeInfos[j]);
+                    var handlingResult = HandleParsingError(args);
+
+                    if (handlingResult == HandlerResult.Modified)
+                    {
+                        redTypeInfos[j] = args.RedTypeInfo;
+                    }
+
+                    if (handlingResult == HandlerResult.NotHandled)
+                    {
+                        // Handle unknown rtti type
+                        throw new DoNotMergeIntoMainBeforeFixedException();
+                    }
+                }
+            }
+
+            var fullType = RedReflection.GetFullType(redTypeInfos);
+
+            var instance = RedTypeManager.Create(fullType);
+            if (instance is IDynamicClass dc)
+            {
+                dc.ClassName = redTypeName;
             }
 
             ReadClass(instance, size);

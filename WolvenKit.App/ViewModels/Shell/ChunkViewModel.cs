@@ -382,28 +382,32 @@ namespace WolvenKit.ViewModels.Shell
                 var dps = redClass.GetDynamicPropertyNames();
                 dps.Sort();
 
-                for (var i = 0; i < pis.Count + dps.Count; i++)
+                foreach (var nativeProperty in pis)
                 {
-                    if (s_hiddenProperties.Contains(obj.GetType().Name + "." + pis[i].RedName))
+                    if (redClass is IDynamicClass && nativeProperty.Name == "ClassName")
                     {
                         continue;
                     }
-                    if (pis.Count > i)
-                    {
-                        var name = !string.IsNullOrEmpty(pis[i].RedName) ? pis[i].RedName : pis[i].Name;
 
-                        Properties.Add(new ChunkViewModel(redClass.GetProperty(name), this, pis[i].RedName)
-                        {
-                            IsReadOnly = isreadonly
-                        });
-                    }
-                    else
+                    if (s_hiddenProperties.Contains(obj.GetType().Name + "." + nativeProperty.RedName))
                     {
-                        Properties.Add(new ChunkViewModel(redClass.GetProperty(dps[i - pis.Count]), this, dps[i - pis.Count])
-                        {
-                            IsReadOnly = isreadonly
-                        });
+                        continue;
                     }
+
+                    var name = !string.IsNullOrEmpty(nativeProperty.RedName) ? nativeProperty.RedName : nativeProperty.Name;
+
+                    Properties.Add(new ChunkViewModel(redClass.GetProperty(name), this, nativeProperty.RedName)
+                    {
+                        IsReadOnly = isreadonly
+                    });
+                }
+
+                foreach (var dynamicProperty in dps)
+                {
+                    Properties.Add(new ChunkViewModel(redClass.GetProperty(dynamicProperty), this, dynamicProperty)
+                    {
+                        IsReadOnly = isreadonly
+                    });
                 }
             }
             else if (obj is SerializationDeferredDataBuffer sddb)

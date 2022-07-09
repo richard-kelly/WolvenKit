@@ -107,13 +107,16 @@ namespace WolvenKit.RED4.CR2W
                 return HandlerResult.Ignore;
             }
 
-            if (e is UnknownRTTIEventArgs { RedTypeInfo: SpecialRedTypeInfo srti })
+            if (e is UnknownRTTIEventArgs { RedTypeInfo: SpecialRedTypeInfo srti } unkEvt)
             {
                 // yeeted in CP v???
                 if (srti.RedName == "gameVisionModuleParams")
                 {
                     return HandlerResult.Skip;
                 }
+
+                unkEvt.RedTypeInfo = new RedTypeInfo(BaseRedType.Class, typeof(DynamicBaseClass)) { RedObjectName = srti.RedName };
+                return HandlerResult.Modified;
             }
 
             if (e is InvalidRTTIEventArgs e1)

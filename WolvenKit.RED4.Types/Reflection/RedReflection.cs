@@ -25,12 +25,12 @@ namespace WolvenKit.RED4.Types
 
         public static ExtendedTypeInfo GetTypeInfo(IRedType value)
         {
-            if (value is DynamicBaseClass dbc)
+            if (value is IDynamicClass dc)
             {
-                if (!s_dynamicTypeInfoCache.TryGetValue(dbc.ClassName, out var result))
+                if (!s_dynamicTypeInfoCache.TryGetValue(dc.ClassName, out var result))
                 {
                     result = new ExtendedTypeInfo();
-                    s_dynamicTypeInfoCache.TryAdd(dbc.ClassName, result);
+                    s_dynamicTypeInfoCache.TryAdd(dc.ClassName, result);
                 }
 
                 return result;

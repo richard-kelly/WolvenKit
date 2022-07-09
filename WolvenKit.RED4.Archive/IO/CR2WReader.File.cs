@@ -245,21 +245,36 @@ namespace WolvenKit.RED4.Archive.IO
             Debug.Assert(BaseStream.Position == info.dataOffset);
 
             var redTypeName = GetStringValue(info.className);
-            var (type, _) = RedReflection.GetCSTypeFromRedType(redTypeName);
 
-            var instance = RedTypeManager.Create(type);
-            if (instance is DynamicBaseClass dbc)
+            var redTypeInfos = RedReflection.GetRedTypeInfos(redTypeName);
+            for (var j = 0; j < redTypeInfos.Count; j++)
             {
-                if (chunkIndex == 0)
+                if (redTypeInfos[j] is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed })
                 {
-                    instance = new DynamicResource { ClassName = redTypeName };
-                }
-                else
-                {
-                    dbc.ClassName = redTypeName;
+                    var args = new UnknownRTTIEventArgs(redTypeInfos[j]);
+                    var handlingResult = HandleParsingError(args);
+
+                    if (handlingResult == HandlerResult.Modified)
+                    {
+                        redTypeInfos[j] = args.RedTypeInfo;
+                    }
+
+                    if (handlingResult == HandlerResult.NotHandled)
+                    {
+                        // Handle unknown rtti type
+                        throw new DoNotMergeIntoMainBeforeFixedException();
+                    }
                 }
             }
 
+            var fullType = RedReflection.GetFullType(redTypeInfos);
+
+            var instance = RedTypeManager.Create(fullType);
+            if (instance is IDynamicClass dc)
+            {
+                dc.ClassName = redTypeName;
+                dc.IsResource = chunkIndex == 0;
+            }
 
             var startPos = BaseStream.Position;
             ReadClass(instance, info.dataSize);
@@ -391,6 +406,7 @@ namespace WolvenKit.RED4.Archive.IO
 
         public EHashVersion IdentifyHash(CName value, uint hash)
         {
+            var tmp = value.GetShortRedHash();
             if (value.GetShortRedHash() == hash)
             {
                 return EHashVersion.Latest;

@@ -70,22 +70,34 @@ namespace WolvenKit.RED4.Archive.IO
 
                 #endregion
 
-                var nativeProp = RedReflection.GetNativePropertyInfo(cls.GetType(), propRedName);
-                if (nativeProp == null)
+                ExtendedPropertyInfo nativeProp = null;
+                if (cls is not IDynamicClass)
                 {
-                    if (HandleParsingError(new UnknownPropertyEventArgs(propRedName)) != HandlerResult.Ignore)
+                    nativeProp = RedReflection.GetNativePropertyInfo(cls.GetType(), propRedName);
+                    if (nativeProp == null)
                     {
-                        // Handle dynamic props
-                        throw new DoNotMergeIntoMainBeforeFixedException();
+                        if (HandleParsingError(new UnknownPropertyEventArgs(propRedName)) != HandlerResult.Ignore)
+                        {
+                            // Handle dynamic props
+                            throw new DoNotMergeIntoMainBeforeFixedException();
+                        }
                     }
                 }
 
                 var redTypeInfos = RedReflection.GetRedTypeInfos(propRedType);
-                foreach (var redTypeInfo in redTypeInfos)
+                for (var j = 0; j < redTypeInfos.Count; j++)
                 {
-                    if (redTypeInfo is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed })
+                    if (redTypeInfos[j] is SpecialRedTypeInfo { SpecialRedType: SpecialRedType.Mixed })
                     {
-                        if (HandleParsingError(new UnknownRTTIEventArgs(redTypeInfo)) != HandlerResult.Ignore)
+                        var args = new UnknownRTTIEventArgs(redTypeInfos[j]);
+                        var handlingResult = HandleParsingError(args);
+
+                        if (handlingResult == HandlerResult.Modified)
+                        {
+                            redTypeInfos[j] = args.RedTypeInfo;
+                        }
+
+                        if (handlingResult == HandlerResult.NotHandled)
                         {
                             // Handle unknown rtti type
                             throw new DoNotMergeIntoMainBeforeFixedException();
@@ -95,23 +107,26 @@ namespace WolvenKit.RED4.Archive.IO
 
                 var value = Read(redTypeInfos, propSize);
 
-                var fullType = RedReflection.GetFullType(redTypeInfos);
-                if (nativeProp.Type != fullType)
+                if (nativeProp != null)
                 {
-                    var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{propRedName}";
-
-                    var handleArgs = new InvalidRTTIEventArgs(propName, nativeProp.Type, fullType, value);
-                    var handleResult = HandleParsingError(handleArgs);
-
-                    if (handleResult == HandlerResult.Modified)
+                    var fullType = RedReflection.GetFullType(redTypeInfos);
+                    if (nativeProp.Type != fullType)
                     {
-                        value = handleArgs.Value;
-                    }
+                        var propName = $"{RedReflection.GetRedTypeFromCSType(cls.GetType())}.{propRedName}";
 
-                    if (handleResult == HandlerResult.NotHandled)
-                    {
-                        // Handle type mismatch
-                        throw new DoNotMergeIntoMainBeforeFixedException();
+                        var handleArgs = new InvalidRTTIEventArgs(propName, nativeProp.Type, fullType, value);
+                        var handleResult = HandleParsingError(handleArgs);
+
+                        if (handleResult == HandlerResult.Modified)
+                        {
+                            value = handleArgs.Value;
+                        }
+
+                        if (handleResult == HandlerResult.NotHandled)
+                        {
+                            // Handle type mismatch
+                            throw new DoNotMergeIntoMainBeforeFixedException();
+                        }
                     }
                 }
 
