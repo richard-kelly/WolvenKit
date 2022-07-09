@@ -4,16 +4,10 @@ public class DynamicBaseClass : RedBaseClass, IDynamicClass
 {
     [REDProperty(IsIgnored = true)]
     public string ClassName { get; set; }
-
-    [REDProperty(IsIgnored = true)]
-    public bool IsResource { get; set; }
 }
 
-public class DynamicResource : CResource, IDynamicClass
+public class DynamicResource : CResource, IDynamicResource
 {
     [REDProperty(IsIgnored = true)]
     public string ClassName { get; set; }
-
-    [REDProperty(IsIgnored = true)]
-    public bool IsResource { get; set; }
 }

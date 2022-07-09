@@ -273,7 +273,11 @@ namespace WolvenKit.RED4.Archive.IO
             if (instance is IDynamicClass dc)
             {
                 dc.ClassName = redTypeName;
-                dc.IsResource = chunkIndex == 0;
+            }
+
+            if (instance is DynamicBaseClass dc2 && chunkIndex == 0)
+            {
+                instance = new DynamicResource { ClassName = dc2.ClassName };
             }
 
             var startPos = BaseStream.Position;
