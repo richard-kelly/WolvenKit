@@ -2,17 +2,10 @@ using System;
 
 namespace WolvenKit.RED4.Types
 {
-    public enum EREDMetaInfo
-    {
-        REDStruct,
-        REDPrimitive,
-        //REDComplex,
-    }
-
     /// <summary>
     /// Marks a field as serializable for redengine files.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property | AttributeTargets.Field)]
     public class REDAttribute : Attribute
     {
         #region Constructors
@@ -63,41 +56,7 @@ namespace WolvenKit.RED4.Types
         #endregion Methods
     }
 
-    /// <summary>
-    /// Marks a field as a compressed buffer for cr2w IO.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public sealed class REDBufferAttribute : REDAttribute
-    {
-        #region Constructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="REDBufferAttribute"/> class.
-        /// </summary>
-        internal REDBufferAttribute(bool isIgnored = false)
-        {
-            IsIgnored = isIgnored;
-        }
-
-        #endregion Constructors
-
-        #region Properties
-
-        public bool IsIgnored { get; private set; }
-
-        #endregion Properties
-
-        #region Methods
-
-        public override string ToString()
-        {
-            return String.Format($"{IsIgnored}");
-        }
-
-        #endregion Methods
-    }
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class)]
     public sealed class REDClassAttribute : Attribute
     {
         internal REDClassAttribute() { }
@@ -106,7 +65,7 @@ namespace WolvenKit.RED4.Types
         public int ChildLevel { get; set; } = 0;
     }
 
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property)]
     public sealed class REDPropertyAttribute : Attribute
     {
         internal REDPropertyAttribute() { }

@@ -8,7 +8,7 @@ public class ClassHashHelper
     private static readonly Dictionary<ulong, Type> _classHashes = new();
     private static Dictionary<Type, ulong> _classHashesReverse = new();
 
-    private static readonly Dictionary<ulong, RedReflection.ExtendedPropertyInfo> _propertyHashes = new();
+    private static readonly Dictionary<ulong, ExtendedPropertyInfo> _propertyHashes = new();
     private static readonly Dictionary<Type, ulong> _typeHashes = new();
 
 
@@ -42,7 +42,7 @@ public class ClassHashHelper
         return _classHashesReverse[type];
     }
 
-    public static RedReflection.ExtendedPropertyInfo? GetPropertyInfo(Type clsType, ulong propHash)
+    public static ExtendedPropertyInfo? GetPropertyInfo(Type clsType, ulong propHash)
     {
         //if (_propertyHashes.ContainsKey(propHash))
         //{
@@ -58,7 +58,7 @@ public class ClassHashHelper
         return result;
 
 
-        RedReflection.ExtendedPropertyInfo? InternalGetProperty(Type clsType, ulong propertyHash)
+        ExtendedPropertyInfo? InternalGetProperty(Type clsType, ulong propertyHash)
         {
             var typeInfo = RedReflection.GetTypeInfo(clsType);
             foreach (var propertyInfo in typeInfo.PropertyInfos)
@@ -89,7 +89,7 @@ public class ClassHashHelper
         }
     }
 
-    public static ulong GetRedTypeHash(RedReflection.ExtendedPropertyInfo propertyInfo)
+    public static ulong GetRedTypeHash(ExtendedPropertyInfo propertyInfo)
     {
         //if (_typeHashes.ContainsKey(type))
         //{
