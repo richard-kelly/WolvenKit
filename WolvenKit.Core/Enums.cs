@@ -22,7 +22,8 @@ namespace WolvenKit.Common
     {
         Cr2w,
         Redscript,
-        Tweak
+        Tweak,
+        Save
     }
 
     public enum ERedScriptExtension

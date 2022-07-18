@@ -1,0 +1,44 @@
+<reactiveUi:ReactiveUserControl
+    x:Class="WolvenKit.Views.Documents.SaveDocumentView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:docVM="clr-namespace:WolvenKit.ViewModels.Documents;assembly=WolvenKit.App"
+    xmlns:reactiveUi="http://reactiveui.net"
+    xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+    xmlns:save="clr-namespace:WolvenKit.RED4.Save;assembly=WolvenKit.RED4.Save"
+    xmlns:editors="clr-namespace:WolvenKit.Views.Editors"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type={x:Type docVM:SaveDocumentViewModel}}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:Name="SaveView"
+    x:TypeArguments="docVM:SaveDocumentViewModel">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <syncfusion:SfTreeView
+            Grid.Column="0"
+            x:Name="SaveTreeView"
+            ChildPropertyName="Children"
+            ItemsSource="{Binding Nodes, Mode=TwoWay}"
+            SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
+            <syncfusion:SfTreeView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                </DataTemplate>
+            </syncfusion:SfTreeView.ItemTemplate>
+        </syncfusion:SfTreeView>
+
+        <syncfusion:SfGridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+
+        <syncfusion:PropertyGrid
+            Grid.Column="2"
+            SelectedObject="{Binding SelectedNode.Value}"/>
+    </Grid>
+</reactiveUi:ReactiveUserControl>

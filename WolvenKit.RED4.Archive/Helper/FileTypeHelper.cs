@@ -41,7 +41,6 @@ namespace WolvenKit.RED4.Archive
         cubemap,
         curveresset,
         curveset,
-        dat,
         devices,
         dlc_manifest,
         dtex,

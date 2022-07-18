@@ -69,6 +69,11 @@
                             <documents:ScriptDocumentView />
                         </Grid>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type docvm:SaveDocumentViewModel}">
+                        <Grid>
+                            <documents:SaveDocumentView />
+                        </Grid>
+                    </DataTemplate>
 
                     <!--<DataTemplate DataType="{x:Type viewmodels:CodeEditorViewModel}">
                         <Grid>

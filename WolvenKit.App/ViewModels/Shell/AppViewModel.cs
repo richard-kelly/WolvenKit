@@ -1151,6 +1151,9 @@ namespace WolvenKit.ViewModels.Shell
                         ? new TweakXLDocumentViewModel(fullPath)
                         : new TweakDocumentViewModel(fullPath);
                     break;
+                case EWolvenKitFile.Save:
+                    fileViewModel = new SaveDocumentViewModel(fullPath);
+                    break;
                 default:
                     break;
             }
@@ -1333,8 +1336,13 @@ namespace WolvenKit.ViewModels.Shell
                 {
                     type = EWolvenKitFile.Tweak;
                 }
+                var isSaveFile = trimmedExt == "DAT";
+                if (isSaveFile)
+                {
+                    type = EWolvenKitFile.Save;
+                }
 
-                if (isRedEngineFile || isRedscriptFile || isTweakFile)
+                if (isRedEngineFile || isRedscriptFile || isTweakFile || isSaveFile)
                 {
                     DispatcherHelper.RunOnMainThread(() =>
                     {
