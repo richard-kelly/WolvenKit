@@ -5,13 +5,15 @@ using WolvenKit.RED4.Types;
 
 namespace WolvenKit.RED4.Save.IO;
 
-public class CyberpunkSaveReader
+public class CyberpunkSaveReader : IDisposable
 {
     private BinaryReader _reader;
 
     private CyberpunkSaveFile? _csavFile;
 
     public List<NodeEntry> NodeEntries;
+
+    private bool _disposed;
 
 
     public CyberpunkSaveReader(Stream input) : this(input, Encoding.UTF8, false)
@@ -255,4 +257,23 @@ public class CyberpunkSaveReader
         }
     }
 
+    #region IDisposable
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _reader.Close();
+            }
+            _disposed = true;
+        }
+    }
+
+    public void Dispose() => Dispose(true);
+
+    public virtual void Close() => Dispose(true);
+
+    #endregion IDisposable
 }

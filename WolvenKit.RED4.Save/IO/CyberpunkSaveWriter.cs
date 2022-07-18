@@ -3,7 +3,7 @@ using WolvenKit.Core.Extensions;
 
 namespace WolvenKit.RED4.Save.IO;
 
-public class CyberpunkSaveWriter
+public class CyberpunkSaveWriter : IDisposable
 {
     private BinaryWriter _writer;
     private Encoding _encoding;
@@ -11,6 +11,8 @@ public class CyberpunkSaveWriter
     private CyberpunkSaveFile _file;
 
     public List<NodeInfo> NodeInfos;
+
+    private bool _disposed;
 
     public CyberpunkSaveWriter(Stream output) : this(output, Encoding.UTF8, false)
     {
@@ -95,4 +97,24 @@ public class CyberpunkSaveWriter
         }
         return result;
     }
+
+    #region IDisposable
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _writer.Close();
+            }
+            _disposed = true;
+        }
+    }
+
+    public void Dispose() => Dispose(true);
+
+    public virtual void Close() => Dispose(true);
+
+    #endregion IDisposable
 }

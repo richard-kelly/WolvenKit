@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using ReactiveUI.Fody.Helpers;
 using Splat;
 using WolvenKit.Common.Services;
+using WolvenKit.RED4.Archive.Buffer;
 using WolvenKit.RED4.Save;
 using WolvenKit.RED4.Save.IO;
+using WolvenKit.RED4.Types;
 using WolvenKit.ViewModels.Documents;
 
 namespace WolvenKit.ViewModels.Documents;
@@ -35,7 +37,7 @@ public class SaveDocumentViewModel : DocumentViewModel
         try
         {
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            var saveReader = new CyberpunkSaveReader(stream);
+            using var saveReader = new CyberpunkSaveReader(stream);
 
             if (saveReader.ReadFile(out SaveFile) == EFileReadErrorCodes.NoError)
             {
@@ -62,7 +64,7 @@ public class SaveDocumentViewModel : DocumentViewModel
     public override Task OnSave(object parameter)
     {
         using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.ReadWrite);
-        var sw = new CyberpunkSaveWriter(fs);
+        using var sw = new CyberpunkSaveWriter(fs);
         sw.WriteFile(SaveFile);
 
         _loggerService.Success($"Saved file {FilePath}");
@@ -85,6 +87,7 @@ public class SaveDocumentViewModel : DocumentViewModel
         public SaveTreeViewItem(NodeEntry nodeEntry)
         {
             DisplayName = nodeEntry.Name;
+            Value = nodeEntry.Value;
 
             if (nodeEntry.Value is Inventory inv)
             {
@@ -93,9 +96,22 @@ public class SaveDocumentViewModel : DocumentViewModel
                     Children.Add(new SaveTreeViewItem(subInventory));
                 }
             }
+            else if (nodeEntry.Value is ItemDropStorage storage)
+            {
+                foreach (var itemData in storage.Items)
+                {
+                    Children.Add(new SaveTreeViewItem(itemData));
+                }
+            }
+            else if (nodeEntry.Value is Package { Content: RedPackage pkg })
+            {
+                foreach (var chunk in pkg.Chunks)
+                {
+                    Children.Add(new SaveTreeViewItem(chunk));
+                }
+            }
             else
             {
-                Value = nodeEntry.Value;
                 foreach (var child in nodeEntry.Children)
                 {
                     Children.Add(new SaveTreeViewItem(child));
@@ -106,6 +122,7 @@ public class SaveDocumentViewModel : DocumentViewModel
         public SaveTreeViewItem(InventoryHelper.SubInventory subInventory)
         {
             DisplayName = $"Inventory {subInventory.InventoryId}";
+            Value = subInventory;
 
             foreach (var itemData in subInventory.Items)
             {
@@ -122,6 +139,12 @@ public class SaveDocumentViewModel : DocumentViewModel
             }
 
             Value = itemData;
+        }
+
+        private SaveTreeViewItem(RedBaseClass cls)
+        {
+            DisplayName = cls.GetType().Name;
+            Value = cls;
         }
     }
 }
