@@ -59,7 +59,16 @@ public class SaveDocumentViewModel : DocumentViewModel
         return false;
     }
 
-    public override Task OnSave(object parameter) => throw new System.NotImplementedException();
+    public override Task OnSave(object parameter)
+    {
+        using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.ReadWrite);
+        var sw = new CyberpunkSaveWriter(fs);
+        sw.WriteFile(SaveFile);
+
+        _loggerService.Success($"Saved file {FilePath}");
+
+        return Task.CompletedTask;
+    }
 
     private void PopulateData()
     {
@@ -86,6 +95,7 @@ public class SaveDocumentViewModel : DocumentViewModel
             }
             else
             {
+                Value = nodeEntry.Value;
                 foreach (var child in nodeEntry.Children)
                 {
                     Children.Add(new SaveTreeViewItem(child));

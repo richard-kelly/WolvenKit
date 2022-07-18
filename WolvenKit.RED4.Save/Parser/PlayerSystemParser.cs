@@ -6,8 +6,8 @@ namespace WolvenKit.RED4.Save
 {
     public class PlayerSystem : INodeData
     {
-        public ulong Unk_Hash { get; set; }
-        public TweakDBID Unk_Id { get; set; }
+        public ulong EntityId { get; set; }
+        public TweakDBID Character { get; set; }
     }
 
 
@@ -18,8 +18,8 @@ namespace WolvenKit.RED4.Save
         public void Read(BinaryReader reader, NodeEntry node)
         {
             var data = new PlayerSystem();
-            data.Unk_Hash = reader.ReadUInt64();
-            data.Unk_Id = reader.ReadUInt64();
+            data.EntityId = reader.ReadUInt64();
+            data.Character = reader.ReadUInt64();
 
             node.Value = data;
         }
@@ -28,8 +28,8 @@ namespace WolvenKit.RED4.Save
         {
             var data = (PlayerSystem)node.Value;
 
-            writer.Write(data.Unk_Hash);
-            writer.Write((ulong)data.Unk_Id);
+            writer.Write(data.EntityId);
+            writer.Write((ulong)data.Character);
         }
     }
 

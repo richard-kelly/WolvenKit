@@ -162,7 +162,7 @@ public class InventoryHelper
 
     public class ModableItemData : IItemData
     {
-        public TweakDBID TdbId1 { get; set; }
+        public TweakDBID LootTable { get; set; }
         public uint Unknown2 { get; set; }
         public float Unknown3 { get; set; }
         public ItemModData RootNode { get; set; }
@@ -170,13 +170,13 @@ public class InventoryHelper
 
     public class ItemModData
     {
-        public TweakDBID ItemTdbId { get; set; }
+        public TweakDBID Unk_BaseItem { get; set; }
         public HeaderThing Header { get; set; }
         public string UnknownString { get; set; }
         public TweakDBID AttachmentSlotTdbId { get; set; }
         public List<ItemModData> Children { get; set; } = new();
         public uint Unknown2 { get; set; }
-        public TweakDBID TdbId2 { get; set; }
+        public TweakDBID LootTable { get; set; }
         public uint Unknown3 { get; set; }
         public float Unknown4 { get; set; }
     }
@@ -295,7 +295,7 @@ public class InventoryHelper
 
         result.Quantity = reader.ReadUInt32();
         var modItem = ReadModableItemData(reader);
-        result.TdbId1 = modItem.TdbId1;
+        result.LootTable = modItem.LootTable;
         result.Unknown2 = modItem.Unknown2;
         result.Unknown3 = modItem.Unknown3;
         result.RootNode = modItem.RootNode;
@@ -306,7 +306,7 @@ public class InventoryHelper
     private static void WriteModableItemWithQuantityData(BinaryWriter writer, ModableItemWithQuantityData modq)
     {
         writer.Write(modq.Quantity);
-        writer.Write((ulong)modq.TdbId1);
+        writer.Write((ulong)modq.LootTable);
         writer.Write(modq.Unknown2);
         writer.Write(modq.Unknown3);
         WriteKind2DataNode(writer, modq.RootNode);
@@ -316,7 +316,7 @@ public class InventoryHelper
     {
         var result = new ModableItemData();
 
-        result.TdbId1 = reader.ReadUInt64();
+        result.LootTable = reader.ReadUInt64();
         result.Unknown2 = reader.ReadUInt32();
         result.Unknown3 = reader.ReadSingle();
         result.RootNode = ReadKind2DataNode(reader);
@@ -326,7 +326,7 @@ public class InventoryHelper
 
     private static void WriteModableItemData(BinaryWriter writer, ModableItemData mod)
     {
-        writer.Write((ulong)mod.TdbId1);
+        writer.Write((ulong)mod.LootTable);
         writer.Write(mod.Unknown2);
         writer.Write(mod.Unknown3);
         WriteKind2DataNode(writer, mod.RootNode);
@@ -336,7 +336,7 @@ public class InventoryHelper
     {
         var result = new ItemModData();
 
-        result.ItemTdbId = reader.ReadUInt64();
+        result.Unk_BaseItem = reader.ReadUInt64();
         result.Header = ReadHeaderThing(reader);
         result.UnknownString = reader.ReadLengthPrefixedString();
         result.AttachmentSlotTdbId = reader.ReadUInt64();
@@ -347,7 +347,7 @@ public class InventoryHelper
         }
 
         result.Unknown2 = reader.ReadUInt32();
-        result.TdbId2 = reader.ReadUInt64();
+        result.LootTable = reader.ReadUInt64();
         result.Unknown3 = reader.ReadUInt32();
         result.Unknown4 = reader.ReadSingle();
 
@@ -356,7 +356,7 @@ public class InventoryHelper
 
     private static void WriteKind2DataNode(BinaryWriter writer, ItemModData mod)
     {
-        writer.Write((ulong)mod.ItemTdbId);
+        writer.Write((ulong)mod.Unk_BaseItem);
         WriteHeaderThing(writer, mod.Header);
         writer.WriteLengthPrefixedString(mod.UnknownString);
         writer.Write((ulong)mod.AttachmentSlotTdbId);
@@ -366,7 +366,7 @@ public class InventoryHelper
             WriteKind2DataNode(writer, child);
         }
         writer.Write(mod.Unknown2);
-        writer.Write((ulong)mod.TdbId2);
+        writer.Write((ulong)mod.LootTable);
         writer.Write(mod.Unknown3);
         writer.Write(mod.Unknown4);
     }
