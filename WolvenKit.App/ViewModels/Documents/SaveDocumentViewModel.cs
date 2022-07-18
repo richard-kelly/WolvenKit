@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using ReactiveUI.Fody.Helpers;
 using Splat;
@@ -17,8 +18,8 @@ public class SaveDocumentViewModel : DocumentViewModel
 
     public CyberpunkSaveFile SaveFile;
 
-    [Reactive] public List<NodeEntry> Nodes { get; set; }
-    [Reactive] public NodeEntry SelectedNode { get; set; }
+    [Reactive] public List<SaveTreeViewItem> Nodes { get; set; }
+    [Reactive] public SaveTreeViewItem SelectedNode { get; set; }
 
     public SaveDocumentViewModel(string path) : base(path)
     {
@@ -62,6 +63,55 @@ public class SaveDocumentViewModel : DocumentViewModel
 
     private void PopulateData()
     {
-        Nodes = SaveFile.Nodes;
+        Nodes = SaveFile.Nodes.Select(x => new SaveTreeViewItem(x)).ToList();
+    }
+
+    public class SaveTreeViewItem
+    {
+        public string DisplayName { get; set; }
+        public List<object> Children { get; set; } = new();
+
+        public object Value { get; set; }
+
+        public SaveTreeViewItem(NodeEntry nodeEntry)
+        {
+            DisplayName = nodeEntry.Name;
+
+            if (nodeEntry.Value is Inventory inv)
+            {
+                foreach (var subInventory in inv.SubInventories)
+                {
+                    Children.Add(new SaveTreeViewItem(subInventory));
+                }
+            }
+            else
+            {
+                foreach (var child in nodeEntry.Children)
+                {
+                    Children.Add(new SaveTreeViewItem(child));
+                }
+            }
+        }
+
+        public SaveTreeViewItem(InventoryHelper.SubInventory subInventory)
+        {
+            DisplayName = $"Inventory {subInventory.InventoryId}";
+
+            foreach (var itemData in subInventory.Items)
+            {
+                Children.Add(new SaveTreeViewItem(itemData));
+            }
+        }
+
+        public SaveTreeViewItem(InventoryHelper.ItemData itemData)
+        {
+            DisplayName = $"<TweakDBID 0x{(ulong)itemData.ItemTdbId:X8}>";
+            if (itemData.ItemTdbId.ResolvedText != null)
+            {
+                DisplayName = itemData.ItemTdbId.ResolvedText;
+            }
+
+            Value = itemData;
+        }
     }
 }

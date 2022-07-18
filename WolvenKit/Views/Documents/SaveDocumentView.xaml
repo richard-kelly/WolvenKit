@@ -30,7 +30,7 @@
             SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
             <syncfusion:SfTreeView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
                 </DataTemplate>
             </syncfusion:SfTreeView.ItemTemplate>
         </syncfusion:SfTreeView>
@@ -39,6 +39,7 @@
 
         <syncfusion:PropertyGrid
             Grid.Column="2"
+            PropertyExpandMode="NestedMode"
             SelectedObject="{Binding SelectedNode.Value}"/>
     </Grid>
 </reactiveUi:ReactiveUserControl>
